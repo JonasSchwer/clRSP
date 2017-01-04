@@ -2,11 +2,12 @@ CC := gcc
 CFLAGS := -Wall -O3 -g -fPIC -std=c99
 LDLIBS += -lOpenCL
 LDLIBS += -lm
+LDLIBS += -lclFFT
 
 #------------------------------------------------------------------------------
 # Define OBJECTS.
 #------------------------------------------------------------------------------
-OBJS += $(patsubst %.c,%.o,$(wildcard src/*.c))
+OBJS += $(patsubst %.c,%.o,$(wildcard lib/*.c))
 
 #------------------------------------------------------------------------------
 # Define executables for EXAMPLES.
@@ -26,7 +27,7 @@ MEX += $(wildcard mex/*.c)
 
 .PHONY: clean realclean
 
-all: objects examples
+all: objects mex
 
 #------------------------------------------------------------------------------
 # example executable targets
@@ -64,22 +65,19 @@ $(OBJS): %.o: %.c
 # MEX files
 #------------------------------------------------------------------------------
 mex: $(MEX)
-	@echo $(MEX)
 
-$(MEX): $(NON_DEP_OBJS)
-
-$(MEX):
+$(MEX): $(OBJS)
 	@echo Building MEX-Executable $@
 	@echo ""
-	@mex CFLAGS='$$CFLAGS $(CFLAGS) -DAMD' \
-		-output bin_mex/$(notdir $@) $@ $(AUX_OBJS) $(OCL_OBJS) $(STOR_OBJS) \
-		$(AMD_OBJS) $(LDLIBS) $(CLFFTLIB)
+	@mex CFLAGS='$$CFLAGS $(CFLAGS)' -output bin/$(notdir $@) $@ $(OBJS) \
+		$(LDLIBS)
 	@echo ""
+
 #------------------------------------------------------------------------------
 
 clean:
-	@rm -f src/*.{o,d}
+	@rm -f lib/*.{o,d}
 
 realclean:
 	@rm -f bin/*
-	@rm -f src/*.{o,d}
+	@rm -f lib/*.{o,d}

@@ -97,7 +97,7 @@ clrspSetupSingleDeviceContext(cl_context *context,
     cps[0] = CL_CONTEXT_PLATFORM;
     cps[1] = (cl_context_properties)platforms[platform_idx];
     size_t i;
-    for (i = 0; i <= num_context_properties; ++i) {
+    for (i = 0; i < num_context_properties; ++i) {
         cps[2 + i] = context_properties[i];
     }
     cps[2 + i] = 0;

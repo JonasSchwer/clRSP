@@ -21,6 +21,7 @@
 *.dylib
 
 # Executables
+bin/*
 *.exe
 *.out
 *.app
@@ -31,3 +32,5 @@
 # Debug files
 *.dSYM/
 *.su
+
+matlab/*
