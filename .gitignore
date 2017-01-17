@@ -33,4 +33,7 @@ bin/*
 *.dSYM/
 *.su
 
+# Dependency files
+*.d
+
 matlab/*
