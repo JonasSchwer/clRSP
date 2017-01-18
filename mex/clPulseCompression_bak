@@ -42,8 +42,8 @@ mexFunction(int nlhs, mxArray *plhs[],
     float *y_real = (float*)mxGetData(prhs[0]);
     float *y_imag = (float*)mxGetImagData(prhs[0]);
 
-    size_t m = mxGetM(prhs[1]);
-    size_t n = mxGetN(prhs[1]);
+    size_t n = mxGetM(prhs[1]);
+    size_t m = mxGetN(prhs[1]);
     float *M_0_real = (float*)mxGetData(prhs[1]);
     float *M_0_imag = (float*)mxGetImagData(prhs[1]);
 
@@ -78,20 +78,38 @@ mexFunction(int nlhs, mxArray *plhs[],
 
     /* perform clPulseCompression. */
     clrspComplexMatrix *y = clrspNewComplexMatrix(1,
-                                                  k,
-                                                  CLRSP_COLUMN_MAJOR);
+                                                  k);
     y->real = y_real;
     y->imag = y_imag;
     clrspComplexMatrix *M_0 = clrspNewComplexMatrix(m,
-                                                    n,
-                                                    CLRSP_COLUMN_MAJOR);
+                                                    n);
     M_0->real = M_0_real;
     M_0->imag = M_0_imag;
     clrspComplexMatrix *M_pc = clrspNewComplexMatrix(m,
-                                                     n + k - 1,
-                                                     CLRSP_COLUMN_MAJOR);
+                                                     n + k - 1);
     M_pc->real = M_pc_real;
     M_pc->imag = M_pc_imag;
+
+    /*
+    int i,j;
+    for (i = 0; i < m*n; ++i) printf("(%li;%06lf) ", i, M_0->real[i]);
+    printf("\n");
+
+    printf("m = %li n = %li\n", m, n);
+    for (i = 0; i < m; ++i) {
+        for (j = 0; j < n; ++j) {
+            printf("(%li,%li;%06.4lf) ", i, j, M_0->real[i * n + j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+    for (i = 0; i < m; ++i) {
+        for (j = 0; j < n; ++j) {
+            printf("%06.4lf ", M_0->imag[i * m + j]);
+        }
+        printf("\n");
+    }
+    */
 
     status = clrspPulseCompression(y,
                                    M_0,

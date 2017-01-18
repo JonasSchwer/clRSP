@@ -107,14 +107,63 @@ clrspSetupSingleDeviceContext(cl_context *context,
     if (status != CL_SUCCESS) { return status; }
 
     /* Setup OpenCL command queue with specified properties. */
+    /*
+    cl_command_queue_properties props = CL_QUEUE_PROFILING_ENABLE;
     *queue = clCreateCommandQueueWithProperties(*context,
                                                 devices[device_idx],
-                                                queue_properties,
+                                                &props,
                                                 &status);
+    */
+    *queue = clCreateCommandQueue(*context,
+                                  devices[device_idx],
+                                  CL_QUEUE_PROFILING_ENABLE,
+                                  &status);
     if (status != CL_SUCCESS) {
         clReleaseContext(*context);
         return status;
     }
+
+    return status;
+}
+
+cl_int
+clrspGetEventProfilingInfo(cl_event *event,
+                           const char *name,
+                           int verbose)
+{
+    cl_int status;
+    cl_ulong value[4];
+
+    status = clGetEventProfilingInfo(*event,
+                                     CL_PROFILING_COMMAND_QUEUED,
+                                     sizeof(cl_ulong),
+                                     &value[0],
+                                     NULL);
+    if (status != CL_SUCCESS) { return status; }
+    status = clGetEventProfilingInfo(*event,
+                                     CL_PROFILING_COMMAND_SUBMIT,
+                                     sizeof(cl_ulong),
+                                     &value[1],
+                                     NULL);
+    if (status != CL_SUCCESS) { return status; }
+    status = clGetEventProfilingInfo(*event,
+                                     CL_PROFILING_COMMAND_START,
+                                     sizeof(cl_ulong),
+                                     &value[2],
+                                     NULL);
+    if (status != CL_SUCCESS) { return status; }
+    status = clGetEventProfilingInfo(*event,
+                                     CL_PROFILING_COMMAND_END,
+                                     sizeof(cl_ulong),
+                                     &value[3],
+                                     NULL);
+    if (status != CL_SUCCESS) { return status; }
+
+    if (verbose) {
+        printf("\n");
+        printf("%19s  %12s\n", " ", "t in ns");
+    }
+    printf("%19s: %12lu\n", name, (value[3]-value[2]));
 
     return status;
 }

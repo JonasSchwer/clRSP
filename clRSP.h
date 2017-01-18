@@ -66,35 +66,31 @@ clrspSetupSingleDeviceContext(cl_context *context,
                               cl_device_type device_type,
                               size_t device_idx);
 
+/* Get profiling information from cl_event. */
+cl_int
+clrspGetEventProfilingInfo(cl_event *event,
+                           const char *name,
+                           int verbose);
+
 /******************************************************************************
 *   Complex matrix datatype.
 ******************************************************************************/
-
-typedef enum clrspStorageOrder_
-{
-    CLRSP_COLUMN_MAJOR = 1, /* Columns lie continually in memory.            */
-    CLRSP_ROW_MAJOR,        /* Rows lie continually in memory.               */
-    CLRSP_ENDSTORAGEORDER   /* Last value of the enum.                       */
-} clrspStorageOrder;
-
 
 struct clrspComplexMatrix_
 {
     size_t rows;                /* Number of rows.                           */
     size_t cols;                /* Number of columns.                        */
-    clrspStorageOrder order;    /* Storage order in memory.                  */
     float *real;                /* Pointer to real data.                     */
     float *imag;                /* Pointer to imaginary data.                */
 };
 typedef struct clrspComplexMatrix_ clrspComplexMatrix;
 
 
-/* Creates a new clrspComplexMatrix struct. Sets rows, cols and order to the
-   given values. Sets the data pointers to NULL. */
+/* Creates a new clrspComplexMatrix struct. Sets rows, cols to the given
+   values. Sets the data pointers to NULL. */
 clrspComplexMatrix*
 clrspNewComplexMatrix(size_t rows,
-                      size_t cols,
-                      clrspStorageOrder order);
+                      size_t cols);
 
 /* Allocates memory for the data pointers A->real and A->imag according to
    A->rows and A->cols. */

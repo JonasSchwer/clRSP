@@ -55,9 +55,9 @@ clrspCreate1DfftPlan(clfftPlanHandle *plan,
     /* Set data strides. */
     size_t clStrides;
     if (dim == CLRSP_ROW_WISE) {
-        clStrides = (A->order == CLRSP_ROW_MAJOR) ? 1 : A->rows;
+        clStrides = 1;
     } else {
-        clStrides = (A->order == CLRSP_COLUMN_MAJOR) ? 1 : A->cols;
+        clStrides = A->cols;
     }
     status = clfftSetPlanInStride(*plan, CLFFT_1D, &clStrides);
     status = clfftSetPlanOutStride(*plan, CLFFT_1D, &clStrides);
@@ -71,9 +71,9 @@ clrspCreate1DfftPlan(clfftPlanHandle *plan,
     /* Set plan batch distance. */
     size_t dist = dim ? 1 : A->rows;
     if (dim == CLRSP_ROW_WISE) {
-        dist = (A->order == CLRSP_ROW_MAJOR) ? A->cols : 1;
+        dist = A->cols;
     } else {
-        dist = (A->order == CLRSP_COLUMN_MAJOR) ? A->rows : 1;
+        dist = 1;
     }
     status = clfftSetPlanDistance(*plan, dist, dist);
     if (status != CL_SUCCESS) { return status; }

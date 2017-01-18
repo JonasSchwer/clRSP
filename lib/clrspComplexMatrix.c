@@ -10,15 +10,13 @@
 
 clrspComplexMatrix*
 clrspNewComplexMatrix(size_t rows,
-                      size_t cols,
-                      clrspStorageOrder order)
+                      size_t cols)
 {
     clrspComplexMatrix *A;
     A = (clrspComplexMatrix*)malloc(sizeof(clrspComplexMatrix));
     assert(A);
     A->rows = rows;
     A->cols = cols;
-    A->order = order;
     A->real = NULL;
     A->imag = NULL;
 

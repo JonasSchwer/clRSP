@@ -116,11 +116,11 @@ clrspElementwiseProduct(const clrspComplexMatrix *X,
     status = clSetKernelArg(kernel, 1, sizeof(cl_mem), X_imag);
     if (status != CL_SUCCESS) { return status; }
 
-    int inc_row = (X->order == CLRSP_ROW_MAJOR) ? X->cols : 1;
+    int inc_row = X->cols;
     status = clSetKernelArg(kernel, 2, sizeof(int), &inc_row);
     if (status != CL_SUCCESS) { return status; }
 
-    int inc_col = (X->order == CLRSP_COLUMN_MAJOR) ? X->rows : 1;
+    int inc_col = 1;
     status = clSetKernelArg(kernel, 3, sizeof(int), &inc_col);
     if (status != CL_SUCCESS) { return status; }
 
@@ -179,8 +179,7 @@ clrspPulseCompression(const clrspComplexMatrix *y,
 
     /* Create clFFT plans for both signals, take zero-padding into account. */
     clrspComplexMatrix *temp = clrspNewComplexMatrix(1,
-                                                     l,
-                                                     y->order);
+                                                     l);
 
     clfftPlanHandle y_fft_plan;
     status = clrspCreate1DfftPlan(&y_fft_plan,
@@ -192,7 +191,6 @@ clrspPulseCompression(const clrspComplexMatrix *y,
 
     clfftPlanHandle M_0_fft_plan;
     temp->rows = m;
-    temp->order = M_0->order;
     status = clrspCreate1DfftPlan(&M_0_fft_plan,
                                   context,
                                   queue,
@@ -410,12 +408,10 @@ clrspPulseCompression(const clrspComplexMatrix *y,
 
     /* Use temporary ComplexMatrices because of zero-padding. */
     clrspComplexMatrix *M_0_ = clrspNewComplexMatrix(M_0->rows,
-                                                     l,
-                                                     M_0->order);
+                                                     l);
 
     clrspComplexMatrix *y_ = clrspNewComplexMatrix(y->rows,
-                                                   l,
-                                                   y->order);
+                                                   l);
 
     cl_event elem_prod;
     status = clrspElementwiseProduct(M_0_,
