@@ -1,7 +1,7 @@
 /******************************************************************************
 *
-*   OpenCL kernel to perform an element-wise vector product, with the complex
-*   conjugated of y.
+*   OpenCL kernel to perform element-wise complex vector-product, between the
+*   rows of matrix X and the vector y.
 *
 *       X(i,:) <- X(i,:) .* y   for i = 1,...,m;
 *

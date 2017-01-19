@@ -280,9 +280,9 @@ clrspPulseCompression(const clrspComplexMatrix *y,
                                  &f_im_y);
     if (status != CL_SUCCESS) { return status; }
 
-    size_t buffer_origin[3] = {0, 0, 0};
-    size_t host_origin[3] = {0, 0, 0};
-    size_t region[3] = {m * sizeof(float), n, 1};
+//    size_t buffer_origin[3] = {0, 0, 0};
+//    size_t host_origin[3] = {0, 0, 0};
+//    size_t region[3] = {m * sizeof(float), n, 1};
 
     cl_event f_re_M_0; /* fill real-part of M_0 event. */
     status = clEnqueueFillBuffer(*queue,
@@ -444,9 +444,9 @@ clrspPulseCompression(const clrspComplexMatrix *y,
 
     /* Get results from device. */
 
-    region[0] = (n + k - 1) * sizeof(float);
-    region[1] = m;
-    region[2] = 1;
+//    region[0] = (n + k - 1) * sizeof(float);
+//    region[1] = m;
+//    region[2] = 1;
 
     cl_event r_re_M_0;
     /*

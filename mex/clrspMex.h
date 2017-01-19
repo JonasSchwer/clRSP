@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-*   Auxiliary interface to Matlab-mex interface.
+*   Auxiliary functions to Matlab-mex interface.
 *
 *   Author(s): Michael, Thoma
 *

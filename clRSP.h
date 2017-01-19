@@ -66,11 +66,10 @@ clrspSetupSingleDeviceContext(cl_context *context,
                               cl_device_type device_type,
                               size_t device_idx);
 
-/* Get profiling information from cl_event. */
+/* Get computation time of event in ns. */
 cl_int
-clrspGetEventProfilingInfo(cl_event *event,
-                           const char *name,
-                           int verbose);
+clrspGetEventDuration(cl_event *event,
+                      cl_ulong *duration);
 
 /******************************************************************************
 *   Complex matrix datatype.
@@ -153,8 +152,24 @@ clrspIFFT(cl_mem *real,
           cl_event *event);
 
 /******************************************************************************
-*   Interface to the pulsecompression.
+*   Interface to signal processing routines.
 ******************************************************************************/
+
+/* Perform element-wise complex vector-product, between each row of matrix X
+   and vector y. */
+cl_int
+clrspElementwiseProduct(const clrspComplexMatrix *X,
+                        cl_mem *X_real,
+                        cl_mem *X_imag,
+                        const clrspComplexMatrix *y,
+                        cl_mem *y_real,
+                        cl_mem *y_imag,
+                        cl_context *context,
+                        cl_command_queue *queue,
+                        cl_uint num_wait_list,
+                        cl_event *wait_list,
+                        cl_event *event);
+
 
 /* Performs the pulsecompression between the transmitted pulse y and the
    recieved CPI matrix M0 and returns the resulting compressed matrix M_pc. */
@@ -173,5 +188,43 @@ clrspPulseCompression(const clrspComplexMatrix *y,
 /* Reads source code from path into character array. */
 char*
 clrspLoadKernelSource(const char *path);
+
+
+/* Allocates memory on device for complex matrix A plus symmetric zero-padding
+   rows according to padding[0] and symmetric zero-padding columns according to
+   padding[1]. Writes A to the device. Returns events, where events correspond
+   to:
+        events[0] <--> fill A_real with zeros
+        events[1] <--> fill A_imag with zeros
+        events[2] <--> write A->real to A_real
+        events[3] <--> write A->imag to A_imag. */
+cl_int
+clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
+                              cl_mem *A_real,
+                              cl_mem *A_imag,
+                              size_t padding[2],
+                              cl_context *context,
+                              cl_mem_flags flags,
+                              cl_command_queue *queue,
+                              cl_uint num_wait_list,
+                              cl_event *wait_list,
+                              cl_event events[4]);
+
+
+/* Reads complex matrix from device. Starts reading at buffer_origin and reads
+   according to A->rows and A->cols. Host memory must be allocated. Returns
+   events, where events correspond to:
+        events[0] <--> read A_real into A->real
+        events[1] <--> read A_imag into A->imag. */
+cl_int
+clrspReadMatrixFromGPU(cl_mem *A_real,
+                       cl_mem *A_imag,
+                       clrspComplexMatrix *A,
+                       size_t buffer_origin[3],
+                       size_t buffer_row_pitch,
+                       cl_command_queue *queue,
+                       cl_uint num_wait_list,
+                       cl_event *wait_list,
+                       cl_event events[2]);
 
 #endif // CLRSP_H
