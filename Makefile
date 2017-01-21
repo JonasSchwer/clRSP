@@ -79,5 +79,4 @@ clean:
 	@rm -f lib/*.{o,d}
 
 realclean:
-	@rm -f bin/*
 	@rm -f lib/*.{o,d}

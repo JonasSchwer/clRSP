@@ -16,26 +16,25 @@ __kernel
 void
 elemProdKernel(__global float *X_real,
                __global float *X_imag,
-               int inc_row,
-               int inc_col,
-               __constant float *y_real,
-               __constant float *y_imag)
+               __global float *y_real,
+               __global float *y_imag,
+               int rows,
+               int cols)
 {
-    /* Get global position in Y direction, i.e. the current row. */
-    int i = get_global_id(1);
-    /* Get global position in X direction, i.e. the current column. */
-    int j = get_global_id(0);
-    /* Get global size in X direction, i.e. the number of columns. */
-    int n = get_global_size(0);
+    /* Detremine global and local position. */
+    int row = get_global_id(1);
+    int col = get_global_id(0);
 
-    int idX = i * inc_row + j * inc_col;
-    int idy = j;
+    /* Perform complex product if it is in bounds. */
+    int Xidx;
+    float real, imag;
 
-    /* Compute real- and imag-part of complex product. */
-    float real = X_real[idX] * y_real[idy] - X_imag[idX] * y_imag[idy];
-    float imag = X_real[idX] * y_imag[idy] + X_imag[idX] * y_real[idy];
+    Xidx = row * cols + col;
 
-    /* Overwrite entries in X. */
-    X_real[idX] = real;
-    X_imag[idX] = imag;
+    real = X_real[Xidx] * y_real[col] - X_imag[Xidx] * y_imag[col];
+    imag = X_real[Xidx] * y_imag[col] + X_imag[Xidx] * y_real[col];
+
+    X_real[Xidx] = real;
+    X_imag[Xidx] = imag;
 }
+

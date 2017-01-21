@@ -189,6 +189,10 @@ clrspPulseCompression(const clrspComplexMatrix *y,
 char*
 clrspLoadKernelSource(const char *path);
 
+/* Prints build log of OpenCL program. */
+void
+clrspPrintBuildLog(cl_program *program,
+                   cl_device_id *device);
 
 /* Allocates memory on device for complex matrix A plus symmetric zero-padding
    rows according to padding[0] and symmetric zero-padding columns according to
@@ -226,5 +230,11 @@ clrspReadMatrixFromGPU(cl_mem *A_real,
                        cl_uint num_wait_list,
                        cl_event *wait_list,
                        cl_event events[2]);
+
+
+/* Rounds up value to the nearest multiple of multiple. */
+size_t
+clrspRoundUp(size_t value,
+             size_t multiple);
 
 #endif // CLRSP_H

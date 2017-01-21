@@ -15,7 +15,7 @@ mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
     /* Check input arguments. */
-    if (nrhs != 2) {
+    if (nrhs != 3) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invalidNumInputs",
                           "Two input arguments required.");
     }
@@ -24,17 +24,20 @@ mexFunction(int nlhs, mxArray *plhs[],
         || mxGetNumberOfDimensions(prhs[0]) != 2
         || !mxIsSingle(prhs[1])
         || !mxIsComplex(prhs[1])
-        || (mxGetN(prhs[1]) != 1 && mxGetM(prhs[1]) != 1)) {
+        || (mxGetN(prhs[1]) != 1 && mxGetM(prhs[1]) != 1)
+        || !mxIsScalar(prhs[2])) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invlaidInputs",
                           "First input must be single, complex matrix.",
-                          "Second input must be single, complex vector.");
+                          "Second input must be single, complex vector.",
+                          "Third input must be integer.");
     }
-    if (nlhs > 1) {
+    if (nlhs > 2) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invalidNumOutputs",
                           "Too many output arguments.");
     }
 
     /* Process input arguments. */
+    int runs = mxGetScalar(prhs[2]);
     size_t m = mxGetM(prhs[0]);
     size_t n = mxGetN(prhs[0]);
     clrspComplexMatrix *X = clrspGetComplexMatrix(prhs[0]);
@@ -99,7 +102,7 @@ mexFunction(int nlhs, mxArray *plhs[],
 
     int i;
     cl_ulong time = 0;
-    for (i = 0; i < 10; ++i) {
+    for (i = 0; i < runs; ++i) {
 
         /* Perform element-wise product. */
         status = clrspElementwiseProduct(X,
@@ -122,8 +125,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                        &duration);
         time += duration;
     }
-    time /= 10;
-    printf("%6lu %6lu %lu\n", m, n, time);
+    time /= runs;
 
     /* Prepare host for output. */
     clrspComplexMatrix *out = clrspNewComplexMatrix(m,
@@ -148,10 +150,25 @@ mexFunction(int nlhs, mxArray *plhs[],
     clFinish(queue);
 
     /* Release OpenCL resources. */
+    status = clReleaseMemObject(X_real);
+    if (status != CL_SUCCESS) { clError(status); }
+    status = clReleaseMemObject(X_imag);
+    if (status != CL_SUCCESS) { clError(status); }
+    status = clReleaseMemObject(y_real);
+    if (status != CL_SUCCESS) { clError(status); }
+    status = clReleaseMemObject(y_imag);
+    if (status != CL_SUCCESS) { clError(status); }
     clFinish(queue);
     clReleaseCommandQueue(queue);
     clReleaseContext(context);
 
     /* Prepare output arguments. */
     plhs[0] = clrspGetmxArray(out);
+    int dims[2] = {1,1};
+    plhs[1] = mxCreateNumericArray(2,
+                                   dims,
+                                   mxUINT64_CLASS,
+                                   mxREAL);
+    unsigned long *data = mxGetData(plhs[1]);
+    data[0] = time;
 }

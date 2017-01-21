@@ -42,6 +42,40 @@ clrspLoadKernelSource(const char *path)
     return kernel_source;
 }
 
+void
+clrspPrintBuildLog(cl_program *program,
+                   cl_device_id *device)
+{
+    size_t ret_size;
+    clGetProgramInfo(*program,
+                     CL_PROGRAM_KERNEL_NAMES,
+                     0,
+                     NULL,
+                     &ret_size);
+    char kernel_names[ret_size];
+    clGetProgramInfo(*program,
+                     CL_PROGRAM_KERNEL_NAMES,
+                     ret_size,
+                     kernel_names,
+                     NULL);
+    printf("Kernel names:\n\t%s\n", kernel_names);
+
+    clGetProgramBuildInfo(*program,
+                          *device,
+                          CL_PROGRAM_BUILD_LOG,
+                          0,
+                          NULL,
+                          &ret_size);
+    char log[ret_size];
+    clGetProgramBuildInfo(*program,
+                          *device,
+                          CL_PROGRAM_BUILD_LOG,
+                          ret_size,
+                          log,
+                          NULL);
+    printf("Build log:\n%s\n", log);
+}
+
 cl_int
 clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
                               cl_mem *A_real,
@@ -198,4 +232,16 @@ clrspReadMatrixFromGPU(cl_mem *A_real,
     if (status != CL_SUCCESS) { return status; }
 
     return status;
+}
+
+size_t
+clrspRoundUp(size_t value,
+             size_t multiple)
+{
+    size_t remainder = value % multiple;
+    if (remainder != 0) {
+        value += multiple - remainder;
+    }
+
+    return value;
 }
