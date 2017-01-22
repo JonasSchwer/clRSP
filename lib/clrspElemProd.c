@@ -88,6 +88,7 @@ clrspElementwiseProduct(const clrspComplexMatrix *X,
     clSetKernelArg(kernel, 3, sizeof(cl_mem), y_imag);
     clSetKernelArg(kernel, 4, sizeof(int), &rows);
     clSetKernelArg(kernel, 5, sizeof(int), &cols);
+    clSetKernelArg(kernel, 6, sizeof(int), &(X->order));
 
     status = clEnqueueNDRangeKernel(*queue,
                                     kernel,

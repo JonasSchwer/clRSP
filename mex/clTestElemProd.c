@@ -15,9 +15,9 @@ mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
     /* Check input arguments. */
-    if (nrhs != 3) {
+    if (nrhs != 4) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invalidNumInputs",
-                          "Two input arguments required.");
+                          "Four input arguments required.");
     }
     if (!mxIsSingle(prhs[0])
         || !mxIsComplex(prhs[0])
@@ -37,20 +37,30 @@ mexFunction(int nlhs, mxArray *plhs[],
     }
 
     /* Process input arguments. */
-    int runs = mxGetScalar(prhs[2]);
+    char *storage_option = mxArrayToString(prhs[3]);
+    clrspStorageOrder order = CLRSP_ROW_MAJOR;
+    if (strcmp(storage_option, "row-major") == 0) {
+        order = CLRSP_ROW_MAJOR;
+    } else if (strcmp(storage_option, "col-major") == 0) {
+        order = CLRSP_COL_MAJOR;
+    } else {
+        mexErrMsgIdAndTxt("MATLAB:clTestElemProd:invalidInputs",
+                          "Unknown option.");
+    }
     size_t m = mxGetM(prhs[0]);
     size_t n = mxGetN(prhs[0]);
-    clrspComplexMatrix *X = clrspGetComplexMatrix(prhs[0]);
+    clrspComplexMatrix *X = clrspGetComplexMatrix(prhs[0],
+                                                  order);
+    int runs = mxGetScalar(prhs[2]);
 
     size_t ny = mxGetM(prhs[1]) > mxGetN(prhs[1])
                         ? mxGetM(prhs[1]) : mxGetN(prhs[1]);
-    /*
     if (n != ny) {
         mexErrMsgIdAndTxt("MATLAB:clTestElemProd:invalidDimensions",
-                          "Length of y must be same as number of rows of X.");
+                          "Length of y must be same as size as cols of X.");
     }
-    */
-    clrspComplexMatrix *y = clrspGetComplexMatrix(prhs[1]);
+    clrspComplexMatrix *y = clrspGetComplexMatrix(prhs[1],
+                                                  order);
 
 
     /* Setup OpenCL environment. */
@@ -131,12 +141,18 @@ mexFunction(int nlhs, mxArray *plhs[],
 
     /* Prepare host for output. */
     clrspComplexMatrix *out = clrspNewComplexMatrix(m,
-                                                    n);
+                                                    n,
+                                                    order);
     clrspAllocComplexMatrix(out);
 
     /* Copy zero-padded data back to host. */
     size_t buffer_origin[3] = {0, 0, 0};
     size_t buffer_row_pitch = n * sizeof(float);
+    if (order == CLRSP_ROW_MAJOR) {
+        buffer_row_pitch = n * sizeof(float);
+    } else {
+        buffer_row_pitch = m * sizeof(float);
+    }
 
     status = clrspReadMatrixFromGPU(&X_real,
                                     &X_imag,

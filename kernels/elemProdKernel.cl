@@ -19,7 +19,8 @@ elemProdKernel(__global float *X_real,
                __global float *y_real,
                __global float *y_imag,
                int rows,
-               int cols)
+               int cols,
+               int order)
 {
     /* Detremine global and local position. */
     int row = get_global_id(1);
@@ -31,7 +32,7 @@ elemProdKernel(__global float *X_real,
         int Xidx;
         float real, imag;
 
-        Xidx = row * cols + col;
+        Xidx = (order == 2) ? row * cols + col : row + col * rows;
 
         real = X_real[Xidx] * y_real[col] - X_imag[Xidx] * y_imag[col];
         imag = X_real[Xidx] * y_imag[col] + X_imag[Xidx] * y_real[col];
