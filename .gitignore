@@ -37,3 +37,4 @@ bin/*
 *.d
 
 matlab/*
+*.dat

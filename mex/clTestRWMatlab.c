@@ -30,17 +30,8 @@ mexFunction(int nlhs, mxArray *plhs[],
     }
 
     /* Process input arguments. */
-    size_t m = mxGetM(prhs[0]);
-    size_t n = mxGetN(prhs[0]);
-    clrspComplexMatrix *M_0 = clrspGetComplexMatrix(prhs[0]);
-
-    /* perform something. */
-    int i,j;
-    for (i = 0; i < m; ++i) {
-        for (j = 0; j < n; ++j) {
-            M_0->real[i * n + j] = i * n + j;
-        }
-    }
+    clrspComplexMatrix *M_0 = clrspGetComplexMatrix(prhs[0],
+                                                    CLRSP_COL_MAJOR);
 
     /* Prepare output arguments. */
     plhs[0] = clrspGetmxArray(M_0);

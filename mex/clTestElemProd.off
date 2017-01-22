@@ -44,10 +44,12 @@ mexFunction(int nlhs, mxArray *plhs[],
 
     size_t ny = mxGetM(prhs[1]) > mxGetN(prhs[1])
                         ? mxGetM(prhs[1]) : mxGetN(prhs[1]);
+    /*
     if (n != ny) {
         mexErrMsgIdAndTxt("MATLAB:clTestElemProd:invalidDimensions",
                           "Length of y must be same as number of rows of X.");
     }
+    */
     clrspComplexMatrix *y = clrspGetComplexMatrix(prhs[1]);
 
 

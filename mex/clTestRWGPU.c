@@ -24,7 +24,7 @@ mexFunction(int nlhs, mxArray *plhs[],
         || mxGetNumberOfDimensions(prhs[0]) != 2
         || !mxIsScalar(prhs[1])) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invlaidInputs",
-                          "First input must be single, complex matrix.",
+                          "First input must be single, complex matrix."
                           "Second input must be positive scalar.");
     }
     if (nlhs > 4) {
@@ -35,7 +35,8 @@ mexFunction(int nlhs, mxArray *plhs[],
     /* Process input arguments. */
     size_t m = mxGetM(prhs[0]);
     size_t n = mxGetN(prhs[0]);
-    clrspComplexMatrix *in = clrspGetComplexMatrix(prhs[0]);
+    clrspComplexMatrix *in = clrspGetComplexMatrix(prhs[0],
+                                                   CLRSP_COL_MAJOR);
     size_t k = mxGetScalar(prhs[1]);
 
     /* Setup OpenCL environment. */
@@ -60,6 +61,7 @@ mexFunction(int nlhs, mxArray *plhs[],
     cl_mem buf_real;
     cl_mem buf_imag;
     size_t padding[2] = {k, k};
+    printf("check 1\n");
 
     status = clrspAllocAndWriteMatrixToGPU(in,
                                            &buf_real,
@@ -72,15 +74,22 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            NULL,
                                            &events[0]);
     if (status != CL_SUCCESS) { clError(status); }
+    printf("check 2");
 
     /* Prepare host for output. */
     clrspComplexMatrix *out = clrspNewComplexMatrix(m + 2 * k,
-                                                    n + 2 * k);
+                                                    n + 2 * k,
+                                                    in->order);
     clrspAllocComplexMatrix(out);
 
     /* Copy zero-padded data back to host. */
     size_t buffer_origin[3] = {0, 0, 0};
     size_t buffer_row_pitch = (n + 2 * k) * sizeof(float);
+    if (in->order == CLRSP_ROW_MAJOR) {
+        buffer_row_pitch = (n + 2 * k) * sizeof(float);
+    } else {
+        buffer_row_pitch = (m + 2 * k) * sizeof(float);
+    }
 
     status = clrspReadMatrixFromGPU(&buf_real,
                                     &buf_imag,

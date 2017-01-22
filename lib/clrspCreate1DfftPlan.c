@@ -9,24 +9,6 @@
 #include "../clRSP.h"
 
 cl_int
-clrspSetupClfftLibrary(clrspClfftStatus *setup)
-{
-    /* Output of API calls. */
-    cl_int status;
-
-    /* Setup clFFT library. */
-    clfftSetupData fft_setup;
-    status = clfftInitSetupData(&fft_setup);
-    if (status != CL_SUCCESS) { return status; };
-    status = clfftSetup(&fft_setup);
-
-    *setup = CLRSP_CLFFT_SETUP;
-
-    return status;
-}
-
-
-cl_int
 clrspCreate1DfftPlan(clfftPlanHandle *plan,
                      cl_context *context,
                      cl_command_queue *queue,
@@ -80,50 +62,6 @@ clrspCreate1DfftPlan(clfftPlanHandle *plan,
 
     /* Bake the plan. */
     status = clfftBakePlan(*plan, 1, queue, NULL, NULL);
-
-    return status;
-}
-
-
-cl_int
-clrspFFT(cl_mem *real,
-         cl_mem *imag,
-         cl_context *context,
-         cl_command_queue *queue,
-         clfftPlanHandle *plan,
-         cl_uint num_wait_events,
-         const cl_event *wait_events,
-         cl_event *event)
-{
-    cl_int status;
-
-    cl_mem inputBufs[2] = {*real, *imag};
-    /* Enqueue forward FFT on queue. */
-    status = clfftEnqueueTransform(*plan, CLFFT_FORWARD, 1, queue,
-                                   num_wait_events, wait_events, event,
-                                   inputBufs, NULL, NULL);
-
-    return status;
-}
-
-
-cl_int
-clrspIFFT(cl_mem *real,
-          cl_mem *imag,
-          cl_context *context,
-          cl_command_queue *queue,
-          clfftPlanHandle *plan,
-          cl_uint num_wait_events,
-          const cl_event *wait_events,
-          cl_event *event)
-{
-    cl_int status;
-
-    cl_mem inputBufs[2] = {*real, *imag};
-    /* Enqueue forward FFT on queue. */
-    status = clfftEnqueueTransform(*plan, CLFFT_BACKWARD, 1, queue,
-                                   num_wait_events, wait_events, event,
-                                   inputBufs, NULL, NULL);
 
     return status;
 }

@@ -1,20 +1,20 @@
 clear all;
-close all;
+% close all;
 clc;
 
 addpath('../bin');
 %%
-m = 128;
-n = 10000;
+m = 12;
+n = 111;
 runs = 1;
 
 X = single(complex(rand(m,n),rand(m,n)));
-y = single(complex(rand(1,n),rand(1,n)));
+y = single(complex(rand(m,1),rand(m,1)));
 [ocl, ~] = clTestElemProd(X,y,runs);
 mat = X;
 for k = 1:runs
-    for i = 1:m
-        mat(i,:) = mat(i,:).*y;
+    for i = 1:n
+        mat(:,i) = mat(:,i).*y;
     end
 end
 

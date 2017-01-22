@@ -26,17 +26,15 @@ elemProdKernel(__global float *X_real,
     int col = get_global_id(0);
 
     /* Perform complex product if it is in bounds. */
-    int in_bounds = (col < cols) ? 1 : 0;
-    if (in_bounds) {
-        int Xidx;
-        float real, imag;
+    int Xidx;
+    float real, imag;
 
-        Xidx = row * cols + col;
+    Xidx = row * cols + col;
 
-        real = X_real[Xidx] * y_real[col] - X_imag[Xidx] * y_imag[col];
-        imag = X_real[Xidx] * y_imag[col] + X_imag[Xidx] * y_real[col];
+    real = X_real[Xidx] * y_real[col] - X_imag[Xidx] * y_imag[col];
+    imag = X_real[Xidx] * y_imag[col] + X_imag[Xidx] * y_real[col];
 
-        X_real[Xidx] = real;
-        X_imag[Xidx] = imag;
-    }
+    X_real[Xidx] = real;
+    X_imag[Xidx] = imag;
 }
+

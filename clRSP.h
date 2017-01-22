@@ -40,6 +40,14 @@ typedef enum clrspClfftStatus_
 } clrspClfftStatus;
 
 
+typedef enum clrspStorageOrder_
+{
+    CLRSP_COL_MAJOR = 1,    /* Columns lie continually in memory. */
+    CLRSP_ROW_MAJOR,        /* Rows lie continually in memory. */
+    CLRSP_ENDSTORAGEORDER   /* Last value of the enum. */
+} clrspStorageOrder;
+
+
 typedef enum clrspPlanDimension_
 {
     CLRSP_ROW_WISE = 1,         /* Row wise fft.                             */
@@ -71,6 +79,20 @@ cl_int
 clrspGetEventDuration(cl_event *event,
                       cl_ulong *duration);
 
+
+/* ... */
+cl_int
+clrspQueryDevices(cl_uint *num_devices,
+                  cl_device_id **devices,
+                  cl_platform_id platform,
+                  cl_device_type device_type);
+
+
+/* ... */
+cl_int
+clrspQueryPlatforms(cl_uint *num_platforms,
+                    cl_platform_id **platforms);
+
 /******************************************************************************
 *   Complex matrix datatype.
 ******************************************************************************/
@@ -79,6 +101,7 @@ struct clrspComplexMatrix_
 {
     size_t rows;                /* Number of rows.                           */
     size_t cols;                /* Number of columns.                        */
+    clrspStorageOrder order;    /* Storage order of the matrix.              */
     float *real;                /* Pointer to real data.                     */
     float *imag;                /* Pointer to imaginary data.                */
 };
@@ -89,7 +112,8 @@ typedef struct clrspComplexMatrix_ clrspComplexMatrix;
    values. Sets the data pointers to NULL. */
 clrspComplexMatrix*
 clrspNewComplexMatrix(size_t rows,
-                      size_t cols);
+                      size_t cols,
+                      clrspStorageOrder order);
 
 /* Allocates memory for the data pointers A->real and A->imag according to
    A->rows and A->cols. */

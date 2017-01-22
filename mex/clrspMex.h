@@ -23,7 +23,8 @@ clError(cl_int status) {
 
 /* Get clrspComplexMatrix form mxArray (Matlab matrix) A. */
 clrspComplexMatrix*
-clrspGetComplexMatrix(const mxArray *A)
+clrspGetComplexMatrix(const mxArray *A,
+                      clrspStorageOrder order)
 {
     size_t m = mxGetM(A);
     size_t n = mxGetN(A);
@@ -31,14 +32,26 @@ clrspGetComplexMatrix(const mxArray *A)
     float *imag = (float*)mxGetImagData(A);
 
     clrspComplexMatrix *B = clrspNewComplexMatrix(m,
-                                                  n);
+                                                  n,
+                                                  order);
     clrspAllocComplexMatrix(B);
 
     size_t i, j;
-    for (j = 0; j < n; ++j) {
+    if (order == CLRSP_COL_MAJOR) {
+        /* Column major. */
         for (i = 0; i < m; ++i) {
-            B->real[i * n + j] = real[j * m + i];
-            B->imag[i * n + j] = imag[j * m + i];
+            for (j = 0; j < n; ++j) {
+                B->real[i * n + j] = real[i * n + j];
+                B->imag[i * n + j] = imag[i * n + j];
+            }
+        }
+    } else {
+        /* Row major. */
+        for (j = 0; j < n; ++j) {
+            for (i = 0; i < m; ++i) {
+                B->real[i * n + j] = real[j * m + i];
+                B->imag[i * n + j] = imag[j * m + i];
+            }
         }
     }
 
@@ -57,10 +70,21 @@ clrspGetmxArray(clrspComplexMatrix *A)
     float *imag = (float*)mxGetImagData(B);
 
     size_t i, j;
-    for (i = 0; i < m; ++i) {
-        for (j = 0; j < n; ++j) {
-            real[j * m + i] = A->real[i * n + j];
-            imag[j * m + i] = A->imag[i * n + j];
+    if (A->order == CLRSP_COL_MAJOR) {
+        /* Column major. */
+        for (i = 0; i < m; ++i) {
+            for (j = 0; j < n; ++j) {
+                real[i * n + j] = A->real[i * n + j];
+                imag[i * n + j] = A->imag[i * n + j];
+            }
+        }
+    } else {
+        /* Row major. */
+        for (i = 0; i < m; ++i) {
+            for (j = 0; j < n; ++j) {
+                real[j * m + i] = A->real[i * n + j];
+                imag[j * m + i] = A->imag[i * n + j];
+            }
         }
     }
 

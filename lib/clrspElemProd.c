@@ -64,7 +64,7 @@ clrspElementwiseProduct(const clrspComplexMatrix *X,
     /*
     clrspPrintBuildLog(&program,
                        &devices[0]);
-    */
+                       */
 
     if (status != CL_SUCCESS) { return status; }
 
@@ -73,13 +73,11 @@ clrspElementwiseProduct(const clrspComplexMatrix *X,
     kernel = clCreateKernel(program, "elemProdKernel", &status);
     if (status != CL_SUCCESS) { return status; }
 
-    /* Define workgroup size. */
-    //size_t local_size[2] = {1, 64};
-
     /* Determine total number of work-items needed. */
     size_t global_size[2] = {X->cols, X->rows};
 
-    /* Determine local buffer size. */
+//    size_t local_size[2] = {256, 1};
+
     int rows = (int)X->rows;
     int cols = (int)X->cols;
 
@@ -96,7 +94,7 @@ clrspElementwiseProduct(const clrspComplexMatrix *X,
                                     2,
                                     NULL,
                                     global_size,
-                                    NULL,
+                                    NULL, //local_size,
                                     num_wait_list,
                                     wait_list,
                                     event);
