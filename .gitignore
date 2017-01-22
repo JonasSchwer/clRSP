@@ -37,4 +37,5 @@ bin/*
 *.d
 
 matlab/*
+benchmarks/data/*
 *.dat
