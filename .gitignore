@@ -28,6 +28,7 @@ bin/*.mexa64
 *.i*86
 *.x86_64
 *.hex
+*.off
 
 # Debug files
 *.dSYM/
