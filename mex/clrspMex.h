@@ -24,7 +24,8 @@ clError(cl_int status) {
 /* Get clrspComplexMatrix form mxArray (Matlab matrix) A. */
 clrspComplexMatrix*
 clrspGetComplexMatrix(const mxArray *A,
-                      clrspStorageOrder order)
+                      clrspStorageOrder order,
+                      clrspComplexLayout layout)
 {
     size_t m = mxGetM(A);
     size_t n = mxGetN(A);
@@ -33,7 +34,8 @@ clrspGetComplexMatrix(const mxArray *A,
 
     clrspComplexMatrix *B = clrspNewComplexMatrix(m,
                                                   n,
-                                                  order);
+                                                  order,
+                                                  layout);
     clrspAllocComplexMatrix(B);
 
     size_t i, j;
@@ -41,16 +43,26 @@ clrspGetComplexMatrix(const mxArray *A,
         /* Column major. */
         for (i = 0; i < m; ++i) {
             for (j = 0; j < n; ++j) {
-                B->real[i * n + j] = real[i * n + j];
-                B->imag[i * n + j] = imag[i * n + j];
+                if (layout == CLRSP_PLANAR) {
+                    B->real[i * n + j] = real[i * n + j];
+                    B->imag[i * n + j] = imag[i * n + j];
+                } else {
+                    B->real[2 * (i * n + j)]     = real[i * n + j];
+                    B->real[2 * (i * n + j) + 1] = imag[i * n + j];
+                }
             }
         }
     } else {
         /* Row major. */
         for (j = 0; j < n; ++j) {
             for (i = 0; i < m; ++i) {
-                B->real[i * n + j] = real[j * m + i];
-                B->imag[i * n + j] = imag[j * m + i];
+                if (layout == CLRSP_PLANAR) {
+                    B->real[i * n + j] = real[j * m + i];
+                    B->imag[i * n + j] = imag[j * m + i];
+                } else {
+                    B->real[2 * (i * n + j)]     = real[j * m + i];
+                    B->real[2 * (i * n + j) + 1] = imag[j * m + i];
+                }
             }
         }
     }
@@ -74,16 +86,26 @@ clrspGetmxArray(clrspComplexMatrix *A)
         /* Column major. */
         for (i = 0; i < m; ++i) {
             for (j = 0; j < n; ++j) {
-                real[i * n + j] = A->real[i * n + j];
-                imag[i * n + j] = A->imag[i * n + j];
+                if (A->layout == CLRSP_PLANAR) {
+                    real[i * n + j] = A->real[i * n + j];
+                    imag[i * n + j] = A->imag[i * n + j];
+                } else {
+                    real[i * n + j] = A->real[2 * (i * n + j)];
+                    imag[i * n + j] = A->real[2 * (i * n + j) + 1];
+                }
             }
         }
     } else {
         /* Row major. */
         for (i = 0; i < m; ++i) {
             for (j = 0; j < n; ++j) {
-                real[j * m + i] = A->real[i * n + j];
-                imag[j * m + i] = A->imag[i * n + j];
+                if (A->layout == CLRSP_PLANAR) {
+                    real[j * m + i] = A->real[i * n + j];
+                    imag[j * m + i] = A->imag[i * n + j];
+                } else {
+                    real[j * m + i] = A->real[2 * (i * n + j)];
+                    imag[j * m + i] = A->real[2 * (i * n + j) + 1];
+                }
             }
         }
     }

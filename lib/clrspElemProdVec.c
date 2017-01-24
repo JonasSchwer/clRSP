@@ -10,22 +10,23 @@
 
 
 cl_int
-clrspElementwiseProduct(const clrspComplexMatrix *X,
-                        cl_mem *X_real,
-                        cl_mem *X_imag,
-                        const clrspComplexMatrix *y,
-                        cl_mem *y_real,
-                        cl_mem *y_imag,
-                        cl_context *context,
-                        cl_command_queue *queue,
-                        cl_uint num_wait_list,
-                        cl_event *wait_list,
-                        cl_event *event)
+clrspElementwiseProductVec(const clrspComplexMatrix *X,
+                           cl_mem *X_real,
+                           cl_mem *X_imag,
+                           const clrspComplexMatrix *y,
+                           cl_mem *y_real,
+                           cl_mem *y_imag,
+                           size_t vec_length,
+                           cl_context *context,
+                           cl_command_queue *queue,
+                           cl_uint num_wait_list,
+                           cl_event *wait_list,
+                           cl_event *event)
 {
     cl_int status;
 
     /* Load kernel source code. */
-    char *src = clrspLoadKernelSource("../kernels/elemProdKernel.cl");
+    char *src = clrspLoadKernelSource("../kernels/elemProdKernelVec.cl");
 
     /* Create the program. */
     cl_program program;
@@ -54,7 +55,9 @@ clrspElementwiseProduct(const clrspComplexMatrix *X,
                               NULL);
     if (status != CL_SUCCESS) { return status; }
 
-    char *options = "-w -cl-fast-relaxed-math";
+//    char *options = "-w -cl-fast-relaxed-math";
+    char options[128];
+    snprintf(options, 128, "-w -cl-fast-relaxed-math -D N=%lu", vec_length);
     status = clBuildProgram(program,
                             num_devices,
                             devices,
@@ -74,14 +77,7 @@ clrspElementwiseProduct(const clrspComplexMatrix *X,
     if (status != CL_SUCCESS) { return status; }
 
     /* Determine total number of work-items needed. */
-    size_t global_size[2];
-    if (X->order == CLRSP_ROW_MAJOR) {
-        global_size[0] = X->cols;
-        global_size[1] = X->rows;
-    } else {
-        global_size[0] = X->rows;
-        global_size[1] = X->cols;
-    }
+    size_t global_size[2] = {(X->cols)/4, X->rows};
     size_t *local_size = NULL;
 
     int rows = (int)X->rows;
@@ -95,7 +91,6 @@ clrspElementwiseProduct(const clrspComplexMatrix *X,
     clSetKernelArg(kernel, 4, sizeof(int), &rows);
     clSetKernelArg(kernel, 5, sizeof(int), &cols);
     clSetKernelArg(kernel, 6, sizeof(int), &(X->order));
-    clSetKernelArg(kernel, 7, sizeof(int), &(X->layout));
 
     status = clEnqueueNDRangeKernel(*queue,
                                     kernel,
@@ -106,7 +101,6 @@ clrspElementwiseProduct(const clrspComplexMatrix *X,
                                     num_wait_list,
                                     wait_list,
                                     event);
-    if (status != CL_SUCCESS) { return status; }
 
     return status;
 }

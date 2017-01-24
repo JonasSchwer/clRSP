@@ -15,9 +15,9 @@ mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
     /* Check input arguments. */
-    if (nrhs != 4) {
+    if (nrhs != 6) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invalidNumInputs",
-                          "Four input arguments required.");
+                          "Five input arguments required.");
     }
     if (!mxIsSingle(prhs[0])
         || !mxIsComplex(prhs[0])
@@ -45,12 +45,34 @@ mexFunction(int nlhs, mxArray *plhs[],
         order = CLRSP_COL_MAJOR;
     } else {
         mexErrMsgIdAndTxt("MATLAB:clTestElemProd:invalidInputs",
-                          "Unknown option.");
+                          "Unknown storage option.");
     }
+    char *layout_option = mxArrayToString(prhs[4]);
+    clrspComplexLayout layout = CLRSP_PLANAR;
+    if (strcmp(layout_option, "planar") == 0) {
+        layout = CLRSP_PLANAR;
+    } else if (strcmp(layout_option, "interleaved") == 0) {
+        layout = CLRSP_INTERLEAVED;
+    } else {
+        mexErrMsgIdAndTxt("MATLAB:clTestElemProd:invalidInputs",
+                          "Unknown layout option.");
+    }
+    char *device_option = mxArrayToString(prhs[5]);
+    cl_device_type device_type = CL_DEVICE_TYPE_CPU;
+    if (strcmp(device_option, "gpu") == 0) {
+        device_type = CL_DEVICE_TYPE_GPU;
+    } else if (strcmp(device_option, "cpu") == 0) {
+        device_type = CL_DEVICE_TYPE_CPU;
+    } else {
+        mexErrMsgIdAndTxt("MATLAB:clTestElemProd:invalidInputs",
+                          "Unknown device option.");
+    }
+
     size_t m = mxGetM(prhs[0]);
     size_t n = mxGetN(prhs[0]);
     clrspComplexMatrix *X = clrspGetComplexMatrix(prhs[0],
-                                                  order);
+                                                  order,
+                                                  layout);
     int runs = mxGetScalar(prhs[2]);
 
     size_t ny = mxGetM(prhs[1]) > mxGetN(prhs[1])
@@ -60,7 +82,8 @@ mexFunction(int nlhs, mxArray *plhs[],
                           "Length of y must be same as size as cols of X.");
     }
     clrspComplexMatrix *y = clrspGetComplexMatrix(prhs[1],
-                                                  order);
+                                                  order,
+                                                  layout);
 
 
     /* Setup OpenCL environment. */
@@ -74,7 +97,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            &queue,
                                            &queue_props,
                                            0,
-                                           CL_DEVICE_TYPE_GPU,
+                                           device_type,
                                            0);
     if (status != CL_SUCCESS) { clError(status); }
 
@@ -138,11 +161,11 @@ mexFunction(int nlhs, mxArray *plhs[],
         time += duration;
     }
     time /= runs;
-
     /* Prepare host for output. */
     clrspComplexMatrix *out = clrspNewComplexMatrix(m,
                                                     n,
-                                                    order);
+                                                    order,
+                                                    X->layout);
     clrspAllocComplexMatrix(out);
 
     /* Copy zero-padded data back to host. */
@@ -152,6 +175,9 @@ mexFunction(int nlhs, mxArray *plhs[],
         buffer_row_pitch = n * sizeof(float);
     } else {
         buffer_row_pitch = m * sizeof(float);
+    }
+    if (out->layout == CLRSP_INTERLEAVED) {
+        buffer_row_pitch *= 2;
     }
 
     status = clrspReadMatrixFromGPU(&X_real,
@@ -170,12 +196,16 @@ mexFunction(int nlhs, mxArray *plhs[],
     /* Release OpenCL resources. */
     status = clReleaseMemObject(X_real);
     if (status != CL_SUCCESS) { clError(status); }
-    status = clReleaseMemObject(X_imag);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (X->layout == CLRSP_PLANAR) {
+        status = clReleaseMemObject(X_imag);
+        if (status != CL_SUCCESS) { clError(status); }
+    }
     status = clReleaseMemObject(y_real);
     if (status != CL_SUCCESS) { clError(status); }
-    status = clReleaseMemObject(y_imag);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (y->layout == CLRSP_PLANAR) {
+        status = clReleaseMemObject(y_imag);
+        if (status != CL_SUCCESS) { clError(status); }
+    }
     clFinish(queue);
     clReleaseCommandQueue(queue);
     clReleaseContext(context);

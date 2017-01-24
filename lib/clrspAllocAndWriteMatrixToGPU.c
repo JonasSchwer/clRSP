@@ -30,6 +30,9 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
 
     /* Allocate memory on device. */
     size_t bufsize = (m + 2 * prows) * (n + 2 * pcols) * sizeof(float);
+    if (A->layout == CLRSP_INTERLEAVED) {
+        bufsize *= 2;
+    }
 
     *A_real = clCreateBuffer(*context,
                              flags,
@@ -38,12 +41,16 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
                              &status);
     if (status != CL_SUCCESS) { return status; }
 
-    *A_imag = clCreateBuffer(*context,
-                             flags,
-                             bufsize,
-                             NULL,
-                             &status);
-    if (status != CL_SUCCESS) { return status; }
+    if (A->layout == CLRSP_PLANAR) {
+        *A_imag = clCreateBuffer(*context,
+                                 flags,
+                                 bufsize,
+                                 NULL,
+                                 &status);
+        if (status != CL_SUCCESS) { return status; }
+    } else {
+        *A_imag = NULL;
+    }
 
     /* Initialize device buffers with 0. */
     const float pattern = 0.;
@@ -59,21 +66,29 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
                                  &events[0]);
     if (status != CL_SUCCESS) { return status; }
 
-    status = clEnqueueFillBuffer(*queue,
-                                 *A_imag,
-                                 (const void*)&pattern,
-                                 sizeof(float),
-                                 0,
-                                 bufsize,
-                                 num_wait_list,
-                                 wait_list,
-                                 &events[1]);
-    if (status != CL_SUCCESS) { return status; }
+    if (A->layout == CLRSP_PLANAR) {
+        status = clEnqueueFillBuffer(*queue,
+                                     *A_imag,
+                                     (const void*)&pattern,
+                                     sizeof(float),
+                                     0,
+                                     bufsize,
+                                     num_wait_list,
+                                     wait_list,
+                                     &events[1]);
+        if (status != CL_SUCCESS) { return status; }
+    } else {
+        events[1] = events[0];
+    }
 
     /* Copy data to device with zero-padding. */
     size_t buffer_origin[3] = {prows * sizeof(float), pcols, 0};
+    if (A->layout == CLRSP_INTERLEAVED) {
+        buffer_origin[0] *= 2;
+    }
     size_t host_origin[3] = {0, 0, 0};
-    size_t region[3] = {n * sizeof(float), m, 1};
+
+    size_t region[3];
     size_t buffer_row_pitch;
     size_t host_row_pitch;
     if (A->order == CLRSP_ROW_MAJOR) {
@@ -88,6 +103,11 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
         region[2] = 1;
         buffer_row_pitch = (m + 2 * pcols) * sizeof(float);
         host_row_pitch = m * sizeof(float);
+    }
+    if (A->layout == CLRSP_INTERLEAVED) {
+        region[0] *= 2;
+        buffer_row_pitch *= 2;
+        host_row_pitch *= 2;
     }
 
     status = clEnqueueWriteBufferRect(*queue,
@@ -106,21 +126,25 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
                                       &events[2]);
     if (status != CL_SUCCESS) { return status; }
 
-    status = clEnqueueWriteBufferRect(*queue,
-                                      *A_imag,
-                                      CL_FALSE,
-                                      buffer_origin,
-                                      host_origin,
-                                      region,
-                                      buffer_row_pitch,
-                                      0,
-                                      host_row_pitch,
-                                      0,
-                                      A->imag,
-                                      1,
-                                      &events[1],
-                                      &events[3]);
-    if (status != CL_SUCCESS) { return status; }
+    if (A->layout == CLRSP_PLANAR) {
+        status = clEnqueueWriteBufferRect(*queue,
+                                          *A_imag,
+                                          CL_FALSE,
+                                          buffer_origin,
+                                          host_origin,
+                                          region,
+                                          buffer_row_pitch,
+                                          0,
+                                          host_row_pitch,
+                                          0,
+                                          A->imag,
+                                          1,
+                                          &events[1],
+                                          &events[3]);
+        if (status != CL_SUCCESS) { return status; }
+    } else {
+        events[3] = events[2];
+    }
 
     return status;
 }

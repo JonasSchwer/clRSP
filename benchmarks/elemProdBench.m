@@ -4,7 +4,10 @@ clc;
 addpath('../bin');
 
 %%
-runs = 1;
+runs = 10;
+order = 'row-major';
+layout = 'interleaved';
+device = 'gpu';
 m = 64;
 nMin = 100;
 nIt  = 100;
@@ -17,8 +20,9 @@ A(:,2) = N;
 
 for i = 1:length(N)
     n = N(i);
-    X = single(complex(rand(n, m), rand(n, m)));
-    y = single(complex(rand(1, m), rand(1, m)));
+    
+    X = single(complex(rand(m, n), rand(m, n)));
+    y = single(complex(rand(1, n), rand(1, n)));
     
 %     b = zeros(1,n);
 %     tic
@@ -27,7 +31,8 @@ for i = 1:length(N)
 %     end
 %     A(i,3) = toc*1e9;
     
-    [~, A(i,3)] = clTestElemProd(X,y,runs);
+    [~, A(i,3)] = clTestElemProd(X,y,runs,order,layout,device);
 end
 
-save(sprintf('data/elemProd%03i.xx.dat',m),'A','-ascii')
+save(sprintf('data/%sElemProd%03i.%s.%s.2.dat',device,m,order,layout),'A','-ascii')
+% save(sprintf('data/test.dat'),'A','-ascii')

@@ -15,12 +15,15 @@ clrspReallocComplexMatrix(clrspComplexMatrix *A,
 {
     assert(A);
 
-    if (rows != A->rows || cols != A->cols) {
+    if (A->layout == CLRSP_PLANAR) {
         A->real = (float*)realloc(A->real, rows * cols * sizeof(float));
         assert(A->real);
         A->imag = (float*)realloc(A->imag, rows * cols * sizeof(float));
         assert(A->imag);
-        A->rows = rows;
-        A->cols = cols;
+    } else {
+        A->real = (float*)realloc(A->real, rows * cols * 2 * sizeof(float));
+        assert(A->real);
     }
+    A->rows = rows;
+    A->cols = cols;
 }

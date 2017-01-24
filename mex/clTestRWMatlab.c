@@ -14,9 +14,9 @@ mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
     /* Check input arguments. */
-    if (nrhs != 1) {
+    if (nrhs != 3) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invalidNumInputs",
-                          "One input arguments required.");
+                          "Three input arguments required.");
     }
     if (!mxIsSingle(prhs[0])
         || !mxIsComplex(prhs[0])
@@ -30,8 +30,30 @@ mexFunction(int nlhs, mxArray *plhs[],
     }
 
     /* Process input arguments. */
+    char *storage_option = mxArrayToString(prhs[1]);
+    clrspStorageOrder order = CLRSP_ROW_MAJOR;
+    if (strcmp(storage_option, "row-major") == 0) {
+        order = CLRSP_ROW_MAJOR;
+    } else if (strcmp(storage_option, "col-major") == 0) {
+        order = CLRSP_COL_MAJOR;
+    } else {
+        mexErrMsgIdAndTxt("MATLAB:clTestRWMatlab:invalidInputs",
+                          "Unknown storage option.");
+    }
+    char *layout_option = mxArrayToString(prhs[2]);
+    clrspComplexLayout layout = CLRSP_PLANAR;
+    if (strcmp(layout_option, "planar") == 0) {
+        layout = CLRSP_PLANAR;
+    } else if (strcmp(layout_option, "interleaved") == 0) {
+        layout = CLRSP_INTERLEAVED;
+    } else {
+        mexErrMsgIdAndTxt("MATLAB:clTestRWMatlab:invalidInputs",
+                          "Unknown layout option.");
+    }
+
     clrspComplexMatrix *M_0 = clrspGetComplexMatrix(prhs[0],
-                                                    CLRSP_COL_MAJOR);
+                                                    order,
+                                                    layout);
 
     /* Prepare output arguments. */
     plhs[0] = clrspGetmxArray(M_0);

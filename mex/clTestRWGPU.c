@@ -15,9 +15,9 @@ mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
     /* Check input arguments. */
-    if (nrhs != 2) {
+    if (nrhs != 5) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invalidNumInputs",
-                          "Two input arguments required.");
+                          "Five input arguments required.");
     }
     if (!mxIsSingle(prhs[0])
         || !mxIsComplex(prhs[0])
@@ -33,10 +33,42 @@ mexFunction(int nlhs, mxArray *plhs[],
     }
 
     /* Process input arguments. */
+    char *storage_option = mxArrayToString(prhs[2]);
+    clrspStorageOrder order = CLRSP_ROW_MAJOR;
+    if (strcmp(storage_option, "row-major") == 0) {
+        order = CLRSP_ROW_MAJOR;
+    } else if (strcmp(storage_option, "col-major") == 0) {
+        order = CLRSP_COL_MAJOR;
+    } else {
+        mexErrMsgIdAndTxt("MATLAB:clTestRWGPU:invalidInputs",
+                          "Unknown storage option.");
+    }
+    char *layout_option = mxArrayToString(prhs[3]);
+    clrspComplexLayout layout = CLRSP_PLANAR;
+    if (strcmp(layout_option, "planar") == 0) {
+        layout = CLRSP_PLANAR;
+    } else if (strcmp(layout_option, "interleaved") == 0) {
+        layout = CLRSP_INTERLEAVED;
+    } else {
+        mexErrMsgIdAndTxt("MATLAB:clTestRWGPU:invalidInputs",
+                          "Unknown layout option.");
+    }
+    char *device_option = mxArrayToString(prhs[4]);
+    cl_device_type device = CL_DEVICE_TYPE_GPU;
+    if (strcmp(device_option, "gpu") == 0) {
+        device = CL_DEVICE_TYPE_GPU;
+    } else if (strcmp(device_option, "cpu") == 0) {
+        device = CL_DEVICE_TYPE_CPU;
+    } else {
+        mexErrMsgIdAndTxt("MATLAB:clTestRWGPU:invalidInputs",
+                          "Unknown device option.");
+    }
+
     size_t m = mxGetM(prhs[0]);
     size_t n = mxGetN(prhs[0]);
     clrspComplexMatrix *in = clrspGetComplexMatrix(prhs[0],
-                                                   CLRSP_COL_MAJOR);
+                                                   order,
+                                                   layout);
     size_t k = mxGetScalar(prhs[1]);
 
     /* Setup OpenCL environment. */
@@ -51,7 +83,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            &queue,
                                            &queue_props,
                                            0,
-                                           CL_DEVICE_TYPE_GPU,
+                                           device,
                                            0);
     if (status != CL_SUCCESS) { clError(status); }
 
@@ -61,7 +93,6 @@ mexFunction(int nlhs, mxArray *plhs[],
     cl_mem buf_real;
     cl_mem buf_imag;
     size_t padding[2] = {k, k};
-    printf("check 1\n");
 
     status = clrspAllocAndWriteMatrixToGPU(in,
                                            &buf_real,
@@ -74,21 +105,24 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            NULL,
                                            &events[0]);
     if (status != CL_SUCCESS) { clError(status); }
-    printf("check 2");
 
     /* Prepare host for output. */
     clrspComplexMatrix *out = clrspNewComplexMatrix(m + 2 * k,
                                                     n + 2 * k,
-                                                    in->order);
+                                                    in->order,
+                                                    in->layout);
     clrspAllocComplexMatrix(out);
 
     /* Copy zero-padded data back to host. */
     size_t buffer_origin[3] = {0, 0, 0};
-    size_t buffer_row_pitch = (n + 2 * k) * sizeof(float);
-    if (in->order == CLRSP_ROW_MAJOR) {
+    size_t buffer_row_pitch;
+    if (out->order == CLRSP_ROW_MAJOR) {
         buffer_row_pitch = (n + 2 * k) * sizeof(float);
     } else {
         buffer_row_pitch = (m + 2 * k) * sizeof(float);
+    }
+    if (out->layout == CLRSP_INTERLEAVED) {
+        buffer_row_pitch *= 2;
     }
 
     status = clrspReadMatrixFromGPU(&buf_real,

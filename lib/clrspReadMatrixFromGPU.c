@@ -39,6 +39,10 @@ clrspReadMatrixFromGPU(cl_mem *A_real,
         region[2] = 1;
         host_row_pitch = m * sizeof(float);
     }
+    if (A->layout == CLRSP_INTERLEAVED) {
+        region[0] *= 2;
+        host_row_pitch *= 2;
+    }
 
     status = clEnqueueReadBufferRect(*queue,
                                      *A_real,
@@ -56,21 +60,25 @@ clrspReadMatrixFromGPU(cl_mem *A_real,
                                      &events[0]);
     if (status != CL_SUCCESS) { return status; }
 
-    status = clEnqueueReadBufferRect(*queue,
-                                     *A_imag,
-                                     CL_FALSE,
-                                     buffer_origin,
-                                     host_origin,
-                                     region,
-                                     buffer_row_pitch,
-                                     0,
-                                     host_row_pitch,
-                                     0,
-                                     A->imag,
-                                     num_wait_list,
-                                     wait_list,
-                                     &events[1]);
-    if (status != CL_SUCCESS) { return status; }
+    if (A->layout == CLRSP_PLANAR) {
+        status = clEnqueueReadBufferRect(*queue,
+                                         *A_imag,
+                                         CL_FALSE,
+                                         buffer_origin,
+                                         host_origin,
+                                         region,
+                                         buffer_row_pitch,
+                                         0,
+                                         host_row_pitch,
+                                         0,
+                                         A->imag,
+                                         num_wait_list,
+                                         wait_list,
+                                         &events[1]);
+        if (status != CL_SUCCESS) { return status; }
+    } else {
+        events[1] = events[0];
+    }
 
     return status;
 }

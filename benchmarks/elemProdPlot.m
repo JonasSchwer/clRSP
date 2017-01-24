@@ -5,15 +5,30 @@ clc;
 addpath('./data')
 listing = dir('./data');
 
-figure
+figure(1)
+figure(2)
 for i = 3:size(listing,1)
     A = load(listing(i).name);
-    plots(i-2) = plot(A(:,2),6*A(:,1).*A(:,2)./A(:,3),'o-');
+    figure(1)
+    plots1(i-2) = plot(A(:,2),6*A(:,1).*A(:,2)./A(:,3),'o-');
+    hold on
+    figure(2)
+    plots2(i-2) = plot(A(:,2),A(:,3),'o-');
     hold on
 end
-hold off
-legend(plots,listing(3:end).name,'Location','northwest')
-title('Elementweises Vector-Product (X 32-by-N, y 1-by-N)');
+
+figure(1)
+legend(plots1,listing(3:end).name,'Location','best')
+title('Elementweises Vector-Product');
 xlabel('N');
 ylabel('GFLOPS');
 grid on
+hold off
+
+figure(2)
+legend(plots2,listing(3:end).name,'Location','best')
+title('Elementweises Vector-Product');
+xlabel('N');
+ylabel('time in ns');
+grid on
+hold off

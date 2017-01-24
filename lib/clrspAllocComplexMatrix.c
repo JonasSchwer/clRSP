@@ -15,8 +15,14 @@ clrspAllocComplexMatrix(clrspComplexMatrix *A)
 
     free(A->real);
     free(A->imag);
-    A->real = (float*)malloc(A->rows * A->cols * sizeof(float));
-    assert(A->real);
-    A->imag = (float*)malloc(A->rows * A->cols * sizeof(float));
-    assert(A->imag);
+    if (A->layout == CLRSP_PLANAR) {
+        A->real = (float*)malloc(A->rows * A->cols * sizeof(float));
+        assert(A->real);
+        A->imag = (float*)malloc(A->rows * A->cols * sizeof(float));
+        assert(A->imag);
+    } else {
+        A->real = (float*)malloc(A->rows * A->cols * 2 * sizeof(float));
+        assert(A->real);
+        A->imag = NULL;
+    }
 }

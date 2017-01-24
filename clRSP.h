@@ -48,6 +48,16 @@ typedef enum clrspStorageOrder_
 } clrspStorageOrder;
 
 
+typedef enum clrspComplexLayout_
+{
+    CLRSP_PLANAR = 1,           /* Real and imaginary data are stored
+                                   seperate. */
+    CLRSP_INTERLEAVED,          /* Real and imaginary data are stored
+                                   continually. */
+    CLRSP_ENDCOMPLESLAYOUT      /* Last value of the enum. */
+} clrspComplexLayout;
+
+
 typedef enum clrspPlanDimension_
 {
     CLRSP_ROW_WISE = 1,         /* Row wise fft.                             */
@@ -102,6 +112,7 @@ struct clrspComplexMatrix_
     size_t rows;                /* Number of rows.                           */
     size_t cols;                /* Number of columns.                        */
     clrspStorageOrder order;    /* Storage order of the matrix.              */
+    clrspComplexLayout layout;  /* Memory layout of complex data.            */
     float *real;                /* Pointer to real data.                     */
     float *imag;                /* Pointer to imaginary data.                */
 };
@@ -113,7 +124,8 @@ typedef struct clrspComplexMatrix_ clrspComplexMatrix;
 clrspComplexMatrix*
 clrspNewComplexMatrix(size_t rows,
                       size_t cols,
-                      clrspStorageOrder order);
+                      clrspStorageOrder order,
+                      clrspComplexLayout layout);
 
 /* Allocates memory for the data pointers A->real and A->imag according to
    A->rows and A->cols. */
@@ -193,6 +205,24 @@ clrspElementwiseProduct(const clrspComplexMatrix *X,
                         cl_uint num_wait_list,
                         cl_event *wait_list,
                         cl_event *event);
+
+
+/* Perform element-wise complex vector-product, between each row of matrix X
+   and vector y. */
+cl_int
+clrspElementwiseProductVec(const clrspComplexMatrix *X,
+                           cl_mem *X_real,
+                           cl_mem *X_imag,
+                           const clrspComplexMatrix *y,
+                           cl_mem *y_real,
+                           cl_mem *y_imag,
+                           size_t vec_lenght,
+                           cl_context *context,
+                           cl_command_queue *queue,
+                           cl_uint num_wait_list,
+                           cl_event *wait_list,
+                           cl_event *event);
+
 
 
 /* Performs the pulsecompression between the transmitted pulse y and the
