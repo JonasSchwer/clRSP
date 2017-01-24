@@ -79,7 +79,7 @@ clrspSetupSingleDeviceContext(cl_context *context,
                               const cl_context_properties *context_properties,
                               size_t num_context_properties,
                               cl_command_queue *queue,
-                              const cl_queue_properties *queue_properties,
+                              const cl_command_queue_properties *queue_properties,
                               size_t platform_idx,
                               cl_device_type device_type,
                               size_t device_idx);

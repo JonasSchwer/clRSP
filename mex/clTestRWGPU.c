@@ -27,7 +27,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                           "First input must be single, complex matrix."
                           "Second input must be positive scalar.");
     }
-    if (nlhs > 4) {
+    if (nlhs > 1) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invalidNumOutputs",
                           "Too many output arguments.");
     }
