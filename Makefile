@@ -1,6 +1,7 @@
 CC := gcc
+MEX := /usr/local/MATLAB/R2014a/bin/mex
 CFLAGS := -Wall -O3 -g -fPIC -std=c99
-LDFLAGS += /usr/lib/x86_64-linux-gnu/libOpenCL.so.1.0.0
+LDFLAGS += /usr/lib/x86_64-linux-gnu/libOpenCL.so
 #LDFLAGS += /usr/lib/libOpenCL.so
 LDLIBS += -lm
 
@@ -39,7 +40,7 @@ mex: $(MEX)
 $(MEX): $(OBJS)
 	@echo Building MEX-Executable $@
 	@echo ""
-	@mex CFLAGS='$$CFLAGS $(CFLAGS)' -output bin/$(notdir $@) $(LDFLAGS) $@ \
+	@$(MEX) CFLAGS='$$CFLAGS $(CFLAGS)' -output bin/$(notdir $@) $(LDFLAGS) $@ \
 		$(OBJS) $(LDLIBS)
 	@echo ""
 
