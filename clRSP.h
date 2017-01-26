@@ -17,7 +17,7 @@
 #include <math.h>
 
 #include <CL/cl.h>
-#include <clFFT/clFFT.h>
+//#include <clFFT/clFFT.h>
 
 /******************************************************************************
 *   Definition of enum constatns.
@@ -152,19 +152,24 @@ clrspFreeComplexMatrix(clrspComplexMatrix *A);
 
 /* Initialize internal clFFT resources. Call once before any clFFT plans are
    created. */
+/*
 cl_int
 clrspSetupClfftLibrary(clrspClfftStatus *setup);
+*/
 
 
 /* Create plan for 1D FFT on ech row or each column of A according to dim. */
+/*
 cl_int
 clrspCreate1DfftPlan(clfftPlanHandle *plan,
                      cl_context *context,
                      cl_command_queue *queue,
                      clrspPlanDimension dim,
                      clrspComplexMatrix *A);
+*/
 
 /* Perform a 1D FFT according to plan. */
+/*
 cl_int
 clrspFFT(cl_mem *real,
          cl_mem *imag,
@@ -174,9 +179,11 @@ clrspFFT(cl_mem *real,
          cl_uint num_wait_events,
          const cl_event *wait_events,
          cl_event *event);
+*/
 
 
 /* Perform a 1D inverse FFT according to plan. */
+/*
 cl_int
 clrspIFFT(cl_mem *real,
           cl_mem *imag,
@@ -186,6 +193,7 @@ clrspIFFT(cl_mem *real,
           cl_uint num_wait_events,
           const cl_event *wait_events,
           cl_event *event);
+*/
 
 /******************************************************************************
 *   Interface to signal processing routines.
@@ -227,6 +235,7 @@ clrspElementwiseProductVec(const clrspComplexMatrix *X,
 
 /* Performs the pulsecompression between the transmitted pulse y and the
    recieved CPI matrix M0 and returns the resulting compressed matrix M_pc. */
+/*
 cl_int
 clrspPulseCompression(const clrspComplexMatrix *y,
                       clrspComplexMatrix *M_0,
@@ -234,6 +243,7 @@ clrspPulseCompression(const clrspComplexMatrix *y,
                       cl_command_queue *queue,
                       clrspClfftStatus *setup,
                       clrspComplexMatrix *M_pc);
+*/
 
 /******************************************************************************
 *   Interface to auxiliary functions.
