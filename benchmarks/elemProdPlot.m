@@ -13,7 +13,7 @@ for i = 3:size(listing,1)
     plots1(i-2) = plot(A(:,2),6*A(:,1).*A(:,2)./A(:,3),'o-');
     hold on
     figure(2)
-    plots2(i-2) = plot(A(:,2),A(:,3),'o-');
+    plots2(i-2) = loglog(A(:,2),A(:,3),'o-');
     hold on
 end
 
@@ -26,6 +26,7 @@ grid on
 hold off
 
 figure(2)
+loglogTriangle(2e3,7e3,4e4,-1,'l')
 legend(plots2,listing(3:end).name,'Location','best')
 title('Elementweises Vector-Product');
 xlabel('N');

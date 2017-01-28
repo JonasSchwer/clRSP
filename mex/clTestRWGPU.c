@@ -15,17 +15,20 @@ mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
     /* Check input arguments. */
-    if (nrhs != 5) {
+    if (nrhs != 8) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invalidNumInputs",
                           "Five input arguments required.");
     }
     if (!mxIsSingle(prhs[0])
         || !mxIsComplex(prhs[0])
         || mxGetNumberOfDimensions(prhs[0]) != 2
-        || !mxIsScalar(prhs[1])) {
+        || !mxIsScalar(prhs[1])
+        || !mxIsScalar(prhs[2])
+        || !mxIsScalar(prhs[3])
+        || !mxIsScalar(prhs[4])) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invlaidInputs",
                           "First input must be single, complex matrix."
-                          "Second input must be positive scalar.");
+                          "Second to fifth input must be positive scalar.");
     }
     if (nlhs > 4) {
         mexErrMsgIdAndTxt("MATLAB:clPulseCompression:invalidNumOutputs",
@@ -33,7 +36,7 @@ mexFunction(int nlhs, mxArray *plhs[],
     }
 
     /* Process input arguments. */
-    char *storage_option = mxArrayToString(prhs[2]);
+    char *storage_option = mxArrayToString(prhs[5]);
     clrspStorageOrder order = CLRSP_ROW_MAJOR;
     if (strcmp(storage_option, "row-major") == 0) {
         order = CLRSP_ROW_MAJOR;
@@ -43,7 +46,7 @@ mexFunction(int nlhs, mxArray *plhs[],
         mexErrMsgIdAndTxt("MATLAB:clTestRWGPU:invalidInputs",
                           "Unknown storage option.");
     }
-    char *layout_option = mxArrayToString(prhs[3]);
+    char *layout_option = mxArrayToString(prhs[6]);
     clrspComplexLayout layout = CLRSP_PLANAR;
     if (strcmp(layout_option, "planar") == 0) {
         layout = CLRSP_PLANAR;
@@ -53,7 +56,7 @@ mexFunction(int nlhs, mxArray *plhs[],
         mexErrMsgIdAndTxt("MATLAB:clTestRWGPU:invalidInputs",
                           "Unknown layout option.");
     }
-    char *device_option = mxArrayToString(prhs[4]);
+    char *device_option = mxArrayToString(prhs[7]);
     cl_device_type device = CL_DEVICE_TYPE_GPU;
     if (strcmp(device_option, "gpu") == 0) {
         device = CL_DEVICE_TYPE_GPU;
@@ -69,7 +72,10 @@ mexFunction(int nlhs, mxArray *plhs[],
     clrspComplexMatrix *in = clrspGetComplexMatrix(prhs[0],
                                                    order,
                                                    layout);
-    size_t k = mxGetScalar(prhs[1]);
+    size_t pt = mxGetScalar(prhs[1]);
+    size_t pb = mxGetScalar(prhs[2]);
+    size_t pl = mxGetScalar(prhs[3]);
+    size_t pr = mxGetScalar(prhs[4]);
 
     /* Setup OpenCL environment. */
     cl_int status;
@@ -92,7 +98,7 @@ mexFunction(int nlhs, mxArray *plhs[],
     /* Allocate memory on device and copy data. */
     cl_mem buf_real;
     cl_mem buf_imag;
-    size_t padding[2] = {k, k};
+    size_t padding[4] = {pt, pb, pl, pr};
 
     status = clrspAllocAndWriteMatrixToGPU(in,
                                            &buf_real,
@@ -107,8 +113,8 @@ mexFunction(int nlhs, mxArray *plhs[],
     if (status != CL_SUCCESS) { clError(status); }
 
     /* Prepare host for output. */
-    clrspComplexMatrix *out = clrspNewComplexMatrix(m + 2 * k,
-                                                    n + 2 * k,
+    clrspComplexMatrix *out = clrspNewComplexMatrix(m + padding[0] + padding[1],
+                                                    n + padding[2] + padding[3],
                                                     in->order,
                                                     in->layout);
     clrspAllocComplexMatrix(out);
@@ -117,9 +123,9 @@ mexFunction(int nlhs, mxArray *plhs[],
     size_t buffer_origin[3] = {0, 0, 0};
     size_t buffer_row_pitch;
     if (out->order == CLRSP_ROW_MAJOR) {
-        buffer_row_pitch = (n + 2 * k) * sizeof(float);
+        buffer_row_pitch = (n + padding[2] + padding[3]) * sizeof(float);
     } else {
-        buffer_row_pitch = (m + 2 * k) * sizeof(float);
+        buffer_row_pitch = (m + padding[0] + padding[1]) * sizeof(float);
     }
     if (out->layout == CLRSP_INTERLEAVED) {
         buffer_row_pitch *= 2;

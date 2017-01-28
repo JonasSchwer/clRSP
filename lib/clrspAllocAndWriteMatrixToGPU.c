@@ -13,7 +13,7 @@ cl_int
 clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
                               cl_mem *A_real,
                               cl_mem *A_imag,
-                              size_t padding[2],
+                              size_t padding[4],
                               cl_context *context,
                               cl_mem_flags flags,
                               cl_command_queue *queue,
@@ -25,11 +25,14 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
 
     size_t m = A->rows;
     size_t n = A->cols;
-    size_t prows = padding[0];
-    size_t pcols = padding[1];
+    size_t p_top = padding[0];
+    size_t p_bottom = padding[1];
+    size_t p_left = padding[2];
+    size_t p_right = padding[3];
 
     /* Allocate memory on device. */
-    size_t bufsize = (m + 2 * prows) * (n + 2 * pcols) * sizeof(float);
+    size_t bufsize
+        = (m + p_top + p_bottom) * (n + p_left + p_right) * sizeof(float);
     if (A->layout == CLRSP_INTERLEAVED) {
         bufsize *= 2;
     }
@@ -82,30 +85,34 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
     }
 
     /* Copy data to device with zero-padding. */
-    size_t buffer_origin[3] = {prows * sizeof(float), pcols, 0};
-    if (A->layout == CLRSP_INTERLEAVED) {
-        buffer_origin[0] *= 2;
-    }
     size_t host_origin[3] = {0, 0, 0};
 
     size_t region[3];
+    size_t buffer_origin[3];
     size_t buffer_row_pitch;
     size_t host_row_pitch;
     if (A->order == CLRSP_ROW_MAJOR) {
         region[0] = n * sizeof(float);
         region[1] = m;
         region[2] = 1;
-        buffer_row_pitch = (n + 2 * pcols) * sizeof(float);
+        buffer_origin[0] = p_left * sizeof(float);
+        buffer_origin[1] = p_top;
+        buffer_origin[2] = 0;
+        buffer_row_pitch = (n + p_left + p_right) * sizeof(float);
         host_row_pitch = n * sizeof(float);
     } else {
         region[0] = m * sizeof(float);
         region[1] = n;
         region[2] = 1;
-        buffer_row_pitch = (m + 2 * pcols) * sizeof(float);
+        buffer_origin[0] = p_top * sizeof(float);
+        buffer_origin[1] = p_left;
+        buffer_origin[2] = 0;
+        buffer_row_pitch = (m + p_top + p_bottom) * sizeof(float);
         host_row_pitch = m * sizeof(float);
     }
     if (A->layout == CLRSP_INTERLEAVED) {
         region[0] *= 2;
+        buffer_origin[0] *= 2;
         buffer_row_pitch *= 2;
         host_row_pitch *= 2;
     }
