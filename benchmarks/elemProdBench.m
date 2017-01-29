@@ -4,14 +4,14 @@ clc;
 addpath('../bin');
 
 %%
-runs = 10;
+runs = 1;
 order = 'row-major';
 layout = 'interleaved';
-device = 'gpu';
+device = 'cpu';
 m = 64;
 nMin = 100;
 nIt  = 100;
-nMax = 10000;
+nMax = 1000;
 
 N = nMin : nIt : nMax;
 A = zeros(length(N),3);
