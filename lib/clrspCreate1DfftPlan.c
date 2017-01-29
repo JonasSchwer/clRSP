@@ -27,7 +27,15 @@ clrspCreate1DfftPlan(clfftPlanHandle *plan,
     if (status != CL_SUCCESS) { return status; }
 
     /* Set data layout. */
-    status = clfftSetLayout(*plan, CLFFT_COMPLEX_PLANAR, CLFFT_COMPLEX_PLANAR);
+    if (A->layout == CLRSP_PLANAR) {
+        status = clfftSetLayout(*plan,
+                                CLFFT_COMPLEX_PLANAR,
+                                CLFFT_COMPLEX_PLANAR);
+    } else {
+        status = clfftSetLayout(*plan,
+                                CLFFT_COMPLEX_INTERLEAVED,
+                                CLFFT_COMPLEX_INTERLEAVED);
+    }
     if (status != CL_SUCCESS) { return status; }
 
     /* Set plan result location. */
@@ -37,9 +45,9 @@ clrspCreate1DfftPlan(clfftPlanHandle *plan,
     /* Set data strides. */
     size_t clStrides;
     if (dim == CLRSP_ROW_WISE) {
-        clStrides = 1;
+        clStrides = (A->order == CLRSP_ROW_MAJOR) ? 1 : A->rows;
     } else {
-        clStrides = A->cols;
+        clStrides = (A->order == CLRSP_COL_MAJOR) ? 1 : A->cols;
     }
     status = clfftSetPlanInStride(*plan, CLFFT_1D, &clStrides);
     status = clfftSetPlanOutStride(*plan, CLFFT_1D, &clStrides);
@@ -51,11 +59,11 @@ clrspCreate1DfftPlan(clfftPlanHandle *plan,
     if (status != CL_SUCCESS) { return status; }
 
     /* Set plan batch distance. */
-    size_t dist = dim ? 1 : A->rows;
+    size_t dist;
     if (dim == CLRSP_ROW_WISE) {
-        dist = A->cols;
+        dist = (A->order == CLRSP_ROW_MAJOR) ? A->cols : 1;
     } else {
-        dist = 1;
+        dist = (A->order == CLRSP_COL_MAJOR) ? A->rows : 1;
     }
     status = clfftSetPlanDistance(*plan, dist, dist);
     if (status != CL_SUCCESS) { return status; }

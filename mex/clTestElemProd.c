@@ -106,7 +106,7 @@ mexFunction(int nlhs, mxArray *plhs[],
     /* Allocate memory on device and copy data. */
     cl_mem X_real;
     cl_mem X_imag;
-    size_t padding[2] = {0, 0};
+    size_t padding[4] = {0, 0, 0, 0};
 
     status = clrspAllocAndWriteMatrixToGPU(X,
                                            &X_real,

@@ -5,9 +5,11 @@ addpath('../bin');
 
 %%
 runs = 10;
+dimension = 'row-wise';
 order = 'row-major';
 layout = 'interleaved';
 device = 'gpu';
+
 m = 64;
 nMin = 100;
 nIt  = 100;
@@ -22,7 +24,6 @@ for i = 1:length(N)
     n = N(i);
     
     X = single(complex(rand(m, n), rand(m, n)));
-    y = single(complex(rand(1, n), rand(1, n)));
     
 %     b = zeros(1,n);
 %     tic
@@ -31,8 +32,8 @@ for i = 1:length(N)
 %     end
 %     A(i,3) = toc*1e9;
     
-    [~, A(i,3)] = clTestElemProd(X,y,runs,order,layout,device);
+    [~, A(i,3)] = clTestFFT(X,runs,dimension,order,layout,device);
 end
 
-save(sprintf('data/elemProd/%sElemProd%03i.%s.%s.2.dat',device,m,order,layout),'A','-ascii')
+save(sprintf('data/fft/%sFFT%s%03i.%s.%s.dat',device,dimension,m,order,layout),'A','-ascii')
 % save(sprintf('data/test.dat'),'A','-ascii')

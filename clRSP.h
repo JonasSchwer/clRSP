@@ -153,7 +153,7 @@ clrspFreeComplexMatrix(clrspComplexMatrix *A);
 /* Initialize internal clFFT resources. Call once before any clFFT plans are
    created. */
 cl_int
-clrspSetupClfftLibrary(clrspClfftStatus *setup);
+clrspSetupClfftLibrary();
 
 
 /* Create plan for 1D FFT on ech row or each column of A according to dim. */
@@ -290,5 +290,12 @@ clrspReadMatrixFromGPU(cl_mem *A_real,
 size_t
 clrspRoundUp(size_t value,
              size_t multiple);
+
+
+/* ... */
+size_t
+clrspNearestPower(const size_t n,
+                  const size_t num_primes,
+                  const size_t *primes);
 
 #endif // CLRSP_H
