@@ -1,8 +1,8 @@
 CC := gcc
 MEXC := /usr/local/MATLAB/R2016a/bin/mex
 CFLAGS := -Wall -O3 -g -fPIC -std=c99
-LDFLAGS += /usr/lib/x86_64-linux-gnu/libOpenCL.so
-#LDFLAGS += /usr/lib/libOpenCL.so
+#LDFLAGS += /usr/lib/x86_64-linux-gnu/libOpenCL.so
+LDFLAGS += /usr/lib/libOpenCL.so
 LDLIBS += -lm
 
 #------------------------------------------------------------------------------

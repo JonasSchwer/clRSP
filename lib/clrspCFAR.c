@@ -11,13 +11,13 @@
 
 cl_int
 clrspCFAR(const clrspComplexMatrix *X,
-                        cl_mem *X_real,
-                        cl_mem *X_imag,
-                        cl_context *context,
-                        cl_command_queue *queue,
-                        cl_uint num_wait_list,
-                        cl_event *wait_list,
-                        cl_event *event)
+          cl_mem *X_real,
+          cl_mem *X_imag,
+          cl_context *context,
+          cl_command_queue *queue,
+          cl_uint num_wait_list,
+          cl_event *wait_list,
+          cl_event *event)
 {
 
 
@@ -26,7 +26,7 @@ clrspCFAR(const clrspComplexMatrix *X,
     cl_int status;
 
     /* Load kernel source code. */
-    char *src = clrspLoadKernelSource("../kernels/elemProdKernel.cl");
+    char *src = clrspLoadKernelSource("../kernels/cfar2dKernel.cl");
 
     /* Create the program. */
     cl_program program;
@@ -71,7 +71,7 @@ clrspCFAR(const clrspComplexMatrix *X,
 
     /* Create the kernel. */
     cl_kernel kernel;
-    kernel = clCreateKernel(program, "elemProdKernel", &status);
+    kernel = clCreateKernel(program, "cfar2dKernel", &status);
     if (status != CL_SUCCESS) { return status; }
 
     /* Determine total number of work-items needed. */
@@ -87,16 +87,22 @@ clrspCFAR(const clrspComplexMatrix *X,
 
     int rows = (int)X->rows;
     int cols = (int)X->cols;
+    float p_fa = 1e-4;
+    int guardLength = 1;
+    int refWidth = 1;
+    int refHeight = 1;
 
     /* Set kernel arguments. */
     clSetKernelArg(kernel, 0, sizeof(cl_mem), X_real);
-    clSetKernelArg(kernel, 1, sizeof(cl_mem), X_imag);
-    clSetKernelArg(kernel, 2, sizeof(cl_mem), y_real);
-    clSetKernelArg(kernel, 3, sizeof(cl_mem), y_imag);
-    clSetKernelArg(kernel, 4, sizeof(int), &rows);
-    clSetKernelArg(kernel, 5, sizeof(int), &cols);
-    clSetKernelArg(kernel, 6, sizeof(int), &(X->order));
-    clSetKernelArg(kernel, 7, sizeof(int), &(X->layout));
+    clSetKernelArg(kernel, 1, sizeof(int), &rows);
+    clSetKernelArg(kernel, 2, sizeof(int), &cols);
+    clSetKernelArg(kernel, 3, sizeof(int), &(X->order));
+    clSetKernelArg(kernel, 4, sizeof(cl_mem), X_imag);
+    clSetKernelArg(kernel, 5, sizeof(float), &p_fa);
+    clSetKernelArg(kernel, 6, sizeof(int), &guardLength);
+    clSetKernelArg(kernel, 7, sizeof(int), &refWidth);
+    clSetKernelArg(kernel, 8, sizeof(int), &refHeight);
+
 
     status = clEnqueueNDRangeKernel(*queue,
                                     kernel,

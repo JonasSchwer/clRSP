@@ -15,7 +15,7 @@ mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
     /* Check input arguments. */
-    if (nrhs != 8) {
+    if (nrhs != 9) {
         mexErrMsgIdAndTxt("MATLAB:clCFAR:invalidNumInputs",
                           "8 input arguments required.");
     }
@@ -29,16 +29,15 @@ mexFunction(int nlhs, mxArray *plhs[],
 
 
 
-    if (    !mxIsUint64(prhs[1])
-         || !mxIsScalar(prhs[1])
-         || !mxIsUint64(prhs[2])
+    /*
+    if (    !mxIsScalar(prhs[1])
          || !mxIsScalar(prhs[2])
-         || !mxIsUint64(prhs[3])
          || !mxIsScalar(prhs[3])                   )
     {
         mexErrMsgIdAndTxt("MATLAB:clCFAR:invlaidInputs",
                           "2nd-4th input must be scalar integer64.");
     }
+    */
 
     if ( !mxIsScalar(prhs[4]))
     {
@@ -90,11 +89,12 @@ mexFunction(int nlhs, mxArray *plhs[],
     clrspComplexMatrix *X = clrspGetComplexMatrix(prhs[0],
                                                   order,
                                                   layout);
-    
+
     size_t guardL    = mxGetScalar(prhs[1]);
     size_t refLW     = mxGetScalar(prhs[2]);
     size_t refLH     = mxGetScalar(prhs[3]);
     double tresh_fac = mxGetScalar(prhs[4]);
+    size_t runs = mxGetScalar(prhs[8]);
 
 
     /* Setup OpenCL environment. */
@@ -138,17 +138,14 @@ mexFunction(int nlhs, mxArray *plhs[],
     for (i = 0; i < runs; ++i) {
 
         /* Perform element-wise product. */
-        status = clrspElementwiseProduct(X,
-                                         &X_real,
-                                         &X_imag,
-                                         y,
-                                         &y_real,
-                                         &y_imag,
-                                         &context,
-                                         &queue,
-                                         8,
-                                         &events[0],
-                                         &events[8]);
+        status = clrspCFAR(X,
+                           &X_real,
+                           &X_imag,
+                           &context,
+                           &queue,
+                           8,
+                           &events[0],
+                           &events[8]);
         if (status != CL_SUCCESS) { clError(status); }
 
         clFinish(queue);
@@ -159,6 +156,7 @@ mexFunction(int nlhs, mxArray *plhs[],
         time += duration;
     }
     time /= runs;
+
     /* Prepare host for output. */
     clrspComplexMatrix *out = clrspNewComplexMatrix(m,
                                                     n,
@@ -198,12 +196,7 @@ mexFunction(int nlhs, mxArray *plhs[],
         status = clReleaseMemObject(X_imag);
         if (status != CL_SUCCESS) { clError(status); }
     }
-    status = clReleaseMemObject(y_real);
-    if (status != CL_SUCCESS) { clError(status); }
-    if (y->layout == CLRSP_PLANAR) {
-        status = clReleaseMemObject(y_imag);
-        if (status != CL_SUCCESS) { clError(status); }
-    }
+
     clFinish(queue);
     clReleaseCommandQueue(queue);
     clReleaseContext(context);

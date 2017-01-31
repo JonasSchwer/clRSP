@@ -301,4 +301,14 @@ size_t
 clrspRoundUp(size_t value,
              size_t multiple);
 
-#endif // CLRSP_H
+cl_int
+clrspCFAR(const clrspComplexMatrix *X,
+          cl_mem *X_real,
+          cl_mem *X_imag,
+          cl_context *context,
+          cl_command_queue *queue,
+          cl_uint num_wait_list,
+          cl_event *wait_list,
+          cl_event *event);
+
+#endif// CLRSP_H
