@@ -4,8 +4,8 @@ clc;
 
 addpath('../bin');
 %%
-m = 2;
-n = 2;
+m = 5;
+n = 5;
 runs = 1;
 
 guardLength = 1;

@@ -112,7 +112,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            0);
     if (status != CL_SUCCESS) { clError(status); }
 
-    cl_event events[11];
+    cl_event events[10];
 
     /* Allocate memory on device and copy data. */
     cl_mem X_real;
@@ -153,7 +153,7 @@ mexFunction(int nlhs, mxArray *plhs[],
         puts("check 0.1");
 
         status = clFinish(queue);
-        if (status != CL_SUCCESS) { clError(status); }
+        if (status != CL_SUCCESS) { puts("erwischt"); clError(status); }
 
         puts("check 0.2");
 
@@ -168,11 +168,16 @@ mexFunction(int nlhs, mxArray *plhs[],
     }
     time /= runs;
 
+    puts("check 0.4");
+
     /* Prepare host for output. */
     clrspComplexMatrix *out = clrspNewComplexMatrix(m,
                                                     n,
                                                     order,
                                                     X->layout);
+
+    puts("check 0.5");
+
     clrspAllocComplexMatrix(out);
 
     /* Copy zero-padded data back to host. */
@@ -187,6 +192,8 @@ mexFunction(int nlhs, mxArray *plhs[],
         buffer_row_pitch *= 2;
     }
 
+    puts("check 0.6");
+
     status = clrspReadMatrixFromGPU(&X_real,
                                     &X_imag,
                                     out,
@@ -195,10 +202,15 @@ mexFunction(int nlhs, mxArray *plhs[],
                                     &queue,
                                     0,
                                     NULL,
-                                    NULL);
+                                    &events[6]);
     if (status != CL_SUCCESS) { clError(status); }
 
+
+    puts("check 0.7");
+
     clFinish(queue);
+
+    puts("check 0.8");
 
     /* Release OpenCL resources. */
     status = clReleaseMemObject(X_real);
@@ -208,9 +220,12 @@ mexFunction(int nlhs, mxArray *plhs[],
         if (status != CL_SUCCESS) { clError(status); }
     }
 
-    clFinish(queue);
+    puts("check 0.9");
     clReleaseCommandQueue(queue);
+    puts("check 0.10");
     clReleaseContext(context);
+    puts("check 0.11");
+
 
     /* Prepare output arguments. */
     plhs[0] = clrspGetmxArray(out);
