@@ -8,10 +8,10 @@ runs = 10;
 dimension = 'row-wise';
 order = 'row-major';
 layout = 'interleaved';
-device = 'gpu';
+device = 'cpu';
 
 m = 64;
-nMin = 100;
+nMin = 5000;
 nIt  = 100;
 nMax = 10000;
 

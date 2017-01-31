@@ -8,8 +8,9 @@ runs = 10;
 order = 'row-major';
 layout = 'interleaved';
 device = 'gpu';
+
 m = 64;
-nMin = 100;
+nMin = 5000;
 nIt  = 100;
 nMax = 10000;
 

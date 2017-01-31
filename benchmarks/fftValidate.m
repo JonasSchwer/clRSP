@@ -4,15 +4,15 @@ clc;
 
 addpath('../bin');
 %%
-m = 64;
-n = 3300;
+m = 1;
+n = 100000;
 l = nearestPower(n,[7,5,3,2]);
 runs = 1;
 
-dimension = 'col-wise';
-order = 'col-major';
-layout = 'planar';
-device = 'cpu';
+dimension = 'row-wise';
+order = 'row-major';
+layout = 'interleaved';
+device = 'gpu';
 
 X = single(complex(rand(m,n),rand(m,n)));
 [ocl,~] = clTestFFT(X,runs,dimension,order,layout,device);
