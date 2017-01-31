@@ -62,17 +62,19 @@ clrspCFAR(const clrspComplexMatrix *X,
                             options,
                             NULL,
                             NULL);
-    /*
     clrspPrintBuildLog(&program,
                        &devices[0]);
-                       */
 
     if (status != CL_SUCCESS) { return status; }
+
+    puts("check 0");
 
     /* Create the kernel. */
     cl_kernel kernel;
     kernel = clCreateKernel(program, "cfar2dKernel", &status);
     if (status != CL_SUCCESS) { return status; }
+
+    puts("check 1");
 
     /* Determine total number of work-items needed. */
     size_t global_size[2];
@@ -83,6 +85,10 @@ clrspCFAR(const clrspComplexMatrix *X,
         global_size[0] = X->rows;
         global_size[1] = X->cols;
     }
+
+
+    puts("check 2");
+
     size_t *local_size = NULL;
 
     int rows = (int)X->rows;
@@ -92,17 +98,21 @@ clrspCFAR(const clrspComplexMatrix *X,
     int refWidth = 1;
     int refHeight = 1;
 
+    puts("check 3");
+
     /* Set kernel arguments. */
     clSetKernelArg(kernel, 0, sizeof(cl_mem), X_real);
     clSetKernelArg(kernel, 1, sizeof(int), &rows);
     clSetKernelArg(kernel, 2, sizeof(int), &cols);
     clSetKernelArg(kernel, 3, sizeof(int), &(X->order));
     clSetKernelArg(kernel, 4, sizeof(cl_mem), X_imag);
-    clSetKernelArg(kernel, 5, sizeof(float), &p_fa);
-    clSetKernelArg(kernel, 6, sizeof(int), &guardLength);
-    clSetKernelArg(kernel, 7, sizeof(int), &refWidth);
-    clSetKernelArg(kernel, 8, sizeof(int), &refHeight);
+    clSetKernelArg(kernel, 5, sizeof(int), &(X->order));
+    clSetKernelArg(kernel, 6, sizeof(float), &p_fa);
+    clSetKernelArg(kernel, 7, sizeof(int), &guardLength);
+    clSetKernelArg(kernel, 8, sizeof(int), &refWidth);
+    clSetKernelArg(kernel, 9, sizeof(int), &refHeight);
 
+    puts("check 4");
 
     status = clEnqueueNDRangeKernel(*queue,
                                     kernel,
@@ -114,6 +124,8 @@ clrspCFAR(const clrspComplexMatrix *X,
                                     wait_list,
                                     event);
     if (status != CL_SUCCESS) { return status; }
+
+    puts("check 5");
 
     return status;
 }

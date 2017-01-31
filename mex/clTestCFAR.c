@@ -137,22 +137,33 @@ mexFunction(int nlhs, mxArray *plhs[],
     cl_ulong time = 0;
     for (i = 0; i < runs; ++i) {
 
+        puts("check 0.0");
+
         /* Perform element-wise product. */
         status = clrspCFAR(X,
                            &X_real,
                            &X_imag,
                            &context,
                            &queue,
-                           8,
+                           4,
                            &events[0],
-                           &events[8]);
+                           &events[4]);
         if (status != CL_SUCCESS) { clError(status); }
 
-        clFinish(queue);
+        puts("check 0.1");
+
+        status = clFinish(queue);
+        if (status != CL_SUCCESS) { clError(status); }
+
+        puts("check 0.2");
 
         cl_ulong duration;
-        status = clrspGetEventDuration(&events[8],
+        status = clrspGetEventDuration(&events[4],
                                        &duration);
+        if (status != CL_SUCCESS) { clError(status); }
+
+        puts("check 0.3");
+
         time += duration;
     }
     time /= runs;
@@ -182,9 +193,9 @@ mexFunction(int nlhs, mxArray *plhs[],
                                     buffer_origin,
                                     buffer_row_pitch,
                                     &queue,
-                                    1,
-                                    &events[8],
-                                    &events[9]);
+                                    0,
+                                    NULL,
+                                    NULL);
     if (status != CL_SUCCESS) { clError(status); }
 
     clFinish(queue);

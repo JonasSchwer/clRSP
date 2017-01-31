@@ -4,8 +4,8 @@ clc;
 
 addpath('../bin');
 %%
-m = 10;
-n = 10;
+m = 2;
+n = 2;
 runs = 1;
 
 guardLength = 1;
@@ -19,7 +19,7 @@ device = 'cpu';
 %%
 X = single(complex(rand(m,n),rand(m,n)));
 y = single(complex(rand(1,n),rand(1,n)));
-[ocl, ~] = clCFAR(X,guardLength,refWidth,refHeight,threshFactor, ...
+[ocl, ~] = clTestCFAR(X,guardLength,refWidth,refHeight,threshFactor, ...
     order,layout,device,runs);
 % mat = X;
 % for k = 1:runs
