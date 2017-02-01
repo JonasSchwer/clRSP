@@ -6,6 +6,17 @@
 *
 ******************************************************************************/
 
+
+//#define DEBUG_BUILD
+
+#ifdef DEBUG_BUILD
+    #define DEBUG(X) X
+#else
+    #define DEBUG(X)
+#endif 
+
+
+
 #include "../clRSP.h"
 
 
@@ -62,17 +73,19 @@ clrspCFAR(const clrspComplexMatrix *X,
                             options,
                             NULL,
                             NULL);
-    clrspPrintBuildLog(&program,
-                       &devices[0]);
+    
+DEBUG(clrspPrintBuildLog(&program,&devices[0]);)
 
     if (status != CL_SUCCESS) { return status; }
 
+DEBUG(puts("Checkpoint 1");)
 
     /* Create the kernel. */
     cl_kernel kernel;
     kernel = clCreateKernel(program, "cfar2dKernel", &status);
     if (status != CL_SUCCESS) { return status; }
 
+DEBUG(puts("Checkpoint 2");)
 
     /* Determine total number of work-items needed. */
     size_t global_size[2];
@@ -84,16 +97,16 @@ clrspCFAR(const clrspComplexMatrix *X,
         global_size[1] = X->cols;
     }
 
-
+DEBUG(puts("Checkpoint 3");)
 
     size_t *local_size = NULL;
 
     int rows = (int)X->rows;
     int cols = (int)X->cols;
     float p_fa = 1e-3;
-    int guardLength = 4;
-    int refWidth = 16;
-    int refHeight = 4;
+    int guardLength = 1;
+    int refWidth = 1;
+    int refHeight = 1;
 
 
     /* Set kernel arguments. */
@@ -108,6 +121,7 @@ clrspCFAR(const clrspComplexMatrix *X,
     clSetKernelArg(kernel, 8, sizeof(int), &refWidth);
     clSetKernelArg(kernel, 9, sizeof(int), &refHeight);
 
+DEBUG(puts("Checkpoint 4");)
 
     status = clEnqueueNDRangeKernel(*queue,
                                     kernel,
@@ -120,6 +134,6 @@ clrspCFAR(const clrspComplexMatrix *X,
                                     event);
     if (status != CL_SUCCESS) { return status; }
 
-
+DEBUG(puts("Checkpoint 5");)
     return status;
 }

@@ -6,6 +6,15 @@
 *
 ******************************************************************************/
 
+
+//#define DEBUG_BUILD
+
+#ifdef DEBUG_BUILD
+    #define DEBUG(X) X
+#else
+    #define DEBUG(X)
+#endif 
+
 #include "../clRSP.h"
 
 cl_int
@@ -19,14 +28,15 @@ clrspReadMatrixFromGPU(cl_mem *A_real,
                        cl_event *wait_list,
                        cl_event events[2])
 {
-    puts("check x.1");
+
+DEBUG(puts("check x.1");)
 
     cl_int status;
 
     size_t m = A->rows;
     size_t n = A->cols;
 
-    puts("check x.2");
+DEBUG(puts("check x.2");)
 
     /* Copy data from device to host memory. */
     size_t host_origin[3] = {0, 0, 0};
@@ -48,7 +58,7 @@ clrspReadMatrixFromGPU(cl_mem *A_real,
         host_row_pitch *= 2;
     }
 
-    puts("check x.3");
+DEBUG(puts("check x.3");)
 
     status = clEnqueueReadBufferRect(*queue,
                                      *A_real,
@@ -66,7 +76,7 @@ clrspReadMatrixFromGPU(cl_mem *A_real,
                                      &events[0]);
     if (status != CL_SUCCESS) { return status; }
 
-    puts("check x.4");
+DEBUG(puts("check x.4");)
 
     if (A->layout == CLRSP_PLANAR) {
         status = clEnqueueReadBufferRect(*queue,
@@ -88,7 +98,7 @@ clrspReadMatrixFromGPU(cl_mem *A_real,
         events[1] = events[0];
     }
 
-    puts("check x.5");
+DEBUG(puts("check x.5");)
 
     return status;
 }

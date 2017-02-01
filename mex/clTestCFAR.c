@@ -6,6 +6,18 @@
 *
 ******************************************************************************/
 
+
+
+//#define DEBUG_BUILD
+
+#ifdef DEBUG_BUILD
+    #define DEBUG(X) X
+#else
+    #define DEBUG(X)
+#endif 
+
+
+
 #include "../clRSP.h"
 #include "clrspMex.h"
 
@@ -130,8 +142,6 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            NULL,
                                            &events[0]);
     if (status != CL_SUCCESS) { clError(status); }
-
-// VON HIER WEITER ANPASSEN
 
     int i;
     cl_ulong time = 0;
