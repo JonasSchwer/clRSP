@@ -22,7 +22,6 @@ cfar2dKernel(__global float *M_RD,      // __read_only
              int refHeight)
 {
 
-    printf("check 1.1\n");
 
     /* Detremine global and local position in M_RD. */
     int row_M_RD = (order_M_RD == 2) ? get_global_id(1) : get_global_id(0);
@@ -39,9 +38,6 @@ cfar2dKernel(__global float *M_RD,      // __read_only
     /* sum of filter elements */
     float sum = 0;
 
-    printf("(row,col) = (%i,%i)\n\t(i,j) = (i,i)\n",
-           row_M_RD, col_M_RD);
-
     int i, j;
     for(i=row_M_RD - (guardLength + refHeight);
         i<= row_M_RD + (guardLength + refHeight);
@@ -52,9 +48,6 @@ cfar2dKernel(__global float *M_RD,      // __read_only
             j<= col_M_RD + (guardLength + refWidth);
             ++j)
         {
-
-            printf("(row,col) = (%i,%i)\n\t(i,j) = (%i,%i)\n",
-                   row_M_RD, col_M_RD, i, j);
 
             int i_in_bounds     = (i >= 0 && i < rows) ? 1 : 0;
             int j_in_bounds     = (j >= 0 && j < cols) ? 1 : 0;

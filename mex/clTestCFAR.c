@@ -137,7 +137,6 @@ mexFunction(int nlhs, mxArray *plhs[],
     cl_ulong time = 0;
     for (i = 0; i < runs; ++i) {
 
-        puts("check 0.0");
 
         /* Perform element-wise product. */
         status = clrspCFAR(X,
@@ -150,25 +149,21 @@ mexFunction(int nlhs, mxArray *plhs[],
                            &events[4]);
         if (status != CL_SUCCESS) { clError(status); }
 
-        puts("check 0.1");
 
         status = clFinish(queue);
         if (status != CL_SUCCESS) { puts("erwischt"); clError(status); }
 
-        puts("check 0.2");
 
         cl_ulong duration;
         status = clrspGetEventDuration(&events[4],
                                        &duration);
         if (status != CL_SUCCESS) { clError(status); }
 
-        puts("check 0.3");
 
         time += duration;
     }
     time /= runs;
 
-    puts("check 0.4");
 
     /* Prepare host for output. */
     clrspComplexMatrix *out = clrspNewComplexMatrix(m,
@@ -176,7 +171,6 @@ mexFunction(int nlhs, mxArray *plhs[],
                                                     order,
                                                     X->layout);
 
-    puts("check 0.5");
 
     clrspAllocComplexMatrix(out);
 
@@ -192,7 +186,6 @@ mexFunction(int nlhs, mxArray *plhs[],
         buffer_row_pitch *= 2;
     }
 
-    puts("check 0.6");
 
     status = clrspReadMatrixFromGPU(&X_real,
                                     &X_imag,
@@ -206,11 +199,9 @@ mexFunction(int nlhs, mxArray *plhs[],
     if (status != CL_SUCCESS) { clError(status); }
 
 
-    puts("check 0.7");
 
     clFinish(queue);
 
-    puts("check 0.8");
 
     /* Release OpenCL resources. */
     status = clReleaseMemObject(X_real);
@@ -220,11 +211,8 @@ mexFunction(int nlhs, mxArray *plhs[],
         if (status != CL_SUCCESS) { clError(status); }
     }
 
-    puts("check 0.9");
     clReleaseCommandQueue(queue);
-    puts("check 0.10");
     clReleaseContext(context);
-    puts("check 0.11");
 
 
     /* Prepare output arguments. */

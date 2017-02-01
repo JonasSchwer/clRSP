@@ -67,14 +67,12 @@ clrspCFAR(const clrspComplexMatrix *X,
 
     if (status != CL_SUCCESS) { return status; }
 
-    puts("check 0");
 
     /* Create the kernel. */
     cl_kernel kernel;
     kernel = clCreateKernel(program, "cfar2dKernel", &status);
     if (status != CL_SUCCESS) { return status; }
 
-    puts("check 1");
 
     /* Determine total number of work-items needed. */
     size_t global_size[2];
@@ -87,18 +85,16 @@ clrspCFAR(const clrspComplexMatrix *X,
     }
 
 
-    puts("check 2");
 
     size_t *local_size = NULL;
 
     int rows = (int)X->rows;
     int cols = (int)X->cols;
-    float p_fa = 1e-4;
-    int guardLength = 1;
-    int refWidth = 1;
-    int refHeight = 1;
+    float p_fa = 1e-3;
+    int guardLength = 4;
+    int refWidth = 16;
+    int refHeight = 4;
 
-    puts("check 3");
 
     /* Set kernel arguments. */
     clSetKernelArg(kernel, 0, sizeof(cl_mem), X_real);
@@ -112,7 +108,6 @@ clrspCFAR(const clrspComplexMatrix *X,
     clSetKernelArg(kernel, 8, sizeof(int), &refWidth);
     clSetKernelArg(kernel, 9, sizeof(int), &refHeight);
 
-    puts("check 4");
 
     status = clEnqueueNDRangeKernel(*queue,
                                     kernel,
@@ -125,7 +120,6 @@ clrspCFAR(const clrspComplexMatrix *X,
                                     event);
     if (status != CL_SUCCESS) { return status; }
 
-    puts("check 5");
 
     return status;
 }
