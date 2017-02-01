@@ -4,9 +4,9 @@ clc;
 
 addpath('../bin');
 %%
-m = 3;
-n = 4;
-runs = 1;
+m = 100;
+n = 1000;
+runs = 50;
 order = 'col-major';
 layout = 'planar';
 device = 'cpu';

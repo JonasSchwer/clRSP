@@ -17,7 +17,7 @@ order = 'row-major';
 layout = 'planar';
 device = 'cpu';
 %%
-% X = single(complex(rand(m,n),rand(m,n)));
+ X = single(complex(rand(m,n),rand(m,n)));
 % y = single(complex(rand(1,n),rand(1,n)));
 [ocl, ~] = clTestCFAR(X,guardLength,refWidth,refHeight,threshFactor, ...
     order,layout,device,runs);
