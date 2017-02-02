@@ -228,12 +228,19 @@ clrspElementwiseProductVec(const clrspComplexMatrix *X,
 /* Performs the pulsecompression between the transmitted pulse y and the
    recieved CPI matrix M0 and returns the resulting compressed matrix M_pc. */
 cl_int
-clrspPulseCompression(const clrspComplexMatrix *y,
-                      clrspComplexMatrix *M_0,
+clrspPulseCompression(clrspComplexMatrix *y,
+                      clfftPlanHandle *y_fft_plan,
+                      cl_mem *y_real,
+                      cl_mem *y_imag,
+                      clrspComplexMatrix *X,
+                      clfftPlanHandle *X_fft_plan,
+                      cl_mem *X_real,
+                      cl_mem *X_imag,
                       cl_context *context,
                       cl_command_queue *queue,
-                      clrspClfftStatus *setup,
-                      clrspComplexMatrix *M_pc);
+                      cl_uint num_wait_events,
+                      const cl_event *wait_events,
+                      cl_event events[4]);
 
 /******************************************************************************
 *   Interface to auxiliary functions.

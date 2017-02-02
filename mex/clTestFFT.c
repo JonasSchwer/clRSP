@@ -103,11 +103,11 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            0,
                                            device,
                                            0);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     /* Initialize clFFT library. */
     status = clrspSetupClfftLibrary();
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     clrspComplexMatrix *temp = clrspNewComplexMatrix(m,
                                                      n,
@@ -137,7 +137,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            0,
                                            NULL,
                                            &events[0]);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     int i;
     cl_ulong time = 0;
@@ -152,7 +152,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                           4,
                           &events[0],
                           &events[4]);
-        if (status != CL_SUCCESS) { clError(status); }
+        if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
         clFinish(queue);
 
@@ -191,16 +191,16 @@ mexFunction(int nlhs, mxArray *plhs[],
                                     1,
                                     &events[4],
                                     &events[5]);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     /* Release OpenCL resources. */
     clFinish(queue);
 
     status = clReleaseMemObject(buf_real);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
     if (in->layout == CLRSP_PLANAR) {
         status = clReleaseMemObject(buf_imag);
-        if (status != CL_SUCCESS) { clError(status); }
+        if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
     }
 
     clfftDestroyPlan(&plan);

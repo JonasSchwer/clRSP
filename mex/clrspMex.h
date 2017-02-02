@@ -15,9 +15,12 @@
 
 /* Give OpenCL error in Matlab. */
 void
-clError(cl_int status) {
-    char err_msg[64];
-    snprintf(err_msg, 64, "OpenCL/clFFT error code %i", status);
+clError(cl_int status, const char *file, const int line) {
+    char err_msg[1024];
+    snprintf(err_msg, 1024, "OpenCL/clFFT error code %i,\n"
+             "in file: %s\n"
+             "in line: %i",
+             status, file, line);
     mexErrMsgIdAndTxt("MATLAB:clrspMex:OpenCLError", err_msg);
 }
 

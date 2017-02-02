@@ -99,7 +99,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            0,
                                            device_type,
                                            0);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     cl_event events[11];
 
@@ -118,7 +118,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            0,
                                            NULL,
                                            &events[0]);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     cl_mem y_real;
     cl_mem y_imag;
@@ -133,7 +133,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            0,
                                            NULL,
                                            &events[4]);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     int i;
     cl_ulong time = 0;
@@ -151,7 +151,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                          8,
                                          &events[0],
                                          &events[8]);
-        if (status != CL_SUCCESS) { clError(status); }
+        if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
         clFinish(queue);
 
@@ -189,22 +189,22 @@ mexFunction(int nlhs, mxArray *plhs[],
                                     1,
                                     &events[8],
                                     &events[9]);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     clFinish(queue);
 
     /* Release OpenCL resources. */
     status = clReleaseMemObject(X_real);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
     if (X->layout == CLRSP_PLANAR) {
         status = clReleaseMemObject(X_imag);
-        if (status != CL_SUCCESS) { clError(status); }
+        if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
     }
     status = clReleaseMemObject(y_real);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
     if (y->layout == CLRSP_PLANAR) {
         status = clReleaseMemObject(y_imag);
-        if (status != CL_SUCCESS) { clError(status); }
+        if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
     }
     clFinish(queue);
     clReleaseCommandQueue(queue);

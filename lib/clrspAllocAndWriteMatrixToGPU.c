@@ -67,7 +67,6 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
                                  num_wait_list,
                                  wait_list,
                                  &events[0]);
-    if (status != CL_SUCCESS) { return status; }
 
     if (A->layout == CLRSP_PLANAR) {
         status = clEnqueueFillBuffer(*queue,
@@ -79,7 +78,7 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
                                      num_wait_list,
                                      wait_list,
                                      &events[1]);
-        if (status != CL_SUCCESS) { return status; }
+        if (status != CL_SUCCESS) { puts("check 1"); return status; }
     } else {
         events[1] = events[0];
     }
@@ -131,7 +130,7 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
                                       1,
                                       &events[0],
                                       &events[2]);
-    if (status != CL_SUCCESS) { return status; }
+    if (status != CL_SUCCESS) { puts("check 2"); return status; }
 
     if (A->layout == CLRSP_PLANAR) {
         status = clEnqueueWriteBufferRect(*queue,
@@ -148,7 +147,7 @@ clrspAllocAndWriteMatrixToGPU(const clrspComplexMatrix *A,
                                           1,
                                           &events[1],
                                           &events[3]);
-        if (status != CL_SUCCESS) { return status; }
+        if (status != CL_SUCCESS) { puts("check 3"); return status; }
     } else {
         events[3] = events[2];
     }

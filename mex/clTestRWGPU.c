@@ -91,7 +91,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            0,
                                            device,
                                            0);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     cl_event events[6];
 
@@ -110,7 +110,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                            0,
                                            NULL,
                                            &events[0]);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     /* Prepare host for output. */
     clrspComplexMatrix *out = clrspNewComplexMatrix(m + padding[0] + padding[1],
@@ -140,7 +140,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                                     2,
                                     &events[2],
                                     &events[4]);
-    if (status != CL_SUCCESS) { clError(status); }
+    if (status != CL_SUCCESS) { clError(status, __FILE__, __LINE__); }
 
     clFinish(queue);
 
