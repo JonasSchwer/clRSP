@@ -105,7 +105,7 @@ mexFunction(int nlhs, mxArray *plhs[],
     size_t guardL    = mxGetScalar(prhs[1]);
     size_t refLW     = mxGetScalar(prhs[2]);
     size_t refLH     = mxGetScalar(prhs[3]);
-    double tresh_fac = mxGetScalar(prhs[4]);
+    double pfa = mxGetScalar(prhs[4]);
     size_t runs = mxGetScalar(prhs[8]);
 
 
@@ -152,6 +152,10 @@ mexFunction(int nlhs, mxArray *plhs[],
         status = clrspCFAR(X,
                            &X_real,
                            &X_imag,
+                           guardL,
+                           refLW,
+                           refLH,
+                           pfa,
                            &context,
                            &queue,
                            4,

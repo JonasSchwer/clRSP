@@ -4,29 +4,21 @@ clc;
 
 addpath('../bin');
 %%
-m = 5;
-n = 5;
+m = 500;
+n = 500;
 runs = 1;
 
-guardLength = 1;
-refWidth = 1;
-refHeight = 1;
-threshFactor = 1;
+guardLength = 4;
+refWidth = 4;
+refHeight = 4;
+pfa = 1;
 
 order = 'row-major';
 layout = 'planar';
 device = 'cpu';
 %%
  X = single(complex(rand(m,n),rand(m,n)));
-% y = single(complex(rand(1,n),rand(1,n)));
-[ocl, ~] = clTestCFAR(X,guardLength,refWidth,refHeight,threshFactor, ...
+
+ 
+[ocl, ~] = clTestCFAR(X,guardLength,refWidth,refHeight,pfa, ...
     order,layout,device,runs);
-% mat = X;
-% for k = 1:runs
-%     for i = 1:m
-%         mat(i,:) = mat(i,:).*y;
-%     end
-% end
-% 
-% norm(real(ocl)-real(mat))
-% norm(imag(ocl)-imag(mat))

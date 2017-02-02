@@ -24,6 +24,10 @@ cl_int
 clrspCFAR(const clrspComplexMatrix *X,
           cl_mem *X_real,
           cl_mem *X_imag,
+          size_t guardL,
+          size_t refLW,
+          size_t refLH,
+          double pfa,
           cl_context *context,
           cl_command_queue *queue,
           cl_uint num_wait_list,
@@ -103,10 +107,10 @@ DEBUG(puts("Checkpoint 3");)
 
     int rows = (int)X->rows;
     int cols = (int)X->cols;
-    float p_fa = 1e-3;
-    int guardLength = 1;
-    int refWidth = 1;
-    int refHeight = 1;
+    float p_fa = pfa;
+    int guardLength = guardL;
+    int refWidth = refLW;
+    int refHeight = refLH;
 
 
     /* Set kernel arguments. */

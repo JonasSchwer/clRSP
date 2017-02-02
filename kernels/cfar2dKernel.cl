@@ -111,7 +111,7 @@ DEBUG(printf("Kernel-Checkpoint 3 for: row=%i, col=%i \n",row_M_RD,col_M_RD);)
     int M_RD_idx = (order_M_RD == 2) ? row_M_RD * cols + col_M_RD : row_M_RD + col_M_RD * rows;
     int M_detect_idx = (order_M_detect == 2) ? row_M_detect * cols + col_M_detect : row_M_detect + col_M_detect * rows;
 
-    M_detect[M_detect_idx] = mean; //(mean*tresh_factor < M_RD[M_RD_idx]);
+    M_detect[M_detect_idx] = (mean*tresh_factor < M_RD[M_RD_idx]);
 
 DEBUG(printf("Kernel about to exit for: row=%i, col=%i \n",row_M_RD,col_M_RD);)
 }
